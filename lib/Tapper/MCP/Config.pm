@@ -404,7 +404,7 @@ sub parse_testprogram
         }
         $testprogram->{runtime} = $testprogram->{runtime} || $self->cfg->{times}{test_runtime_default};
 
-        return "No timeout for testprogram" if not $testprogram->{timeout};
+        $testprogram->{timeout} = ($self->cfg->{times}{default_testprogram_timeout} // 600) unless defined $testprogram->{timeout};
         no warnings 'uninitialized';
         push @{$config->{prcs}->[$prc_number]->{config}->{testprogram_list}}, $testprogram;
         $self->mcp_info->add_testprogram($prc_number, $testprogram);
@@ -507,8 +507,6 @@ sub update_installer_grub
                 my $tftp_server = $self->cfg->{tftp_server_address};
 
                 $config->{installer_grub} = <<END;
-serial --unit=0 --speed=115200
-terminal serial
 
 default 0
 timeout 2
