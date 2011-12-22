@@ -546,15 +546,15 @@ sub produce
 {
         my ($self, $config, $precondition) = @_;
         my $producer = Tapper::Producer->new();
-        my $retval = $producer->produce($self->testrun->testrun_scheduling, $precondition);
+        my $producer_config = $producer->produce($self->testrun->testrun_scheduling, $precondition);
 
-        return $retval if not ref($retval) eq 'HASH';
+        return $producer_config if not ref($producer_config) eq 'HASH';
 
-        if ($retval->{topic}) {
-                $self->testrun->topic_name($retval->{topic});
+        if ($producer_config->{topic}) {
+                $self->testrun->topic_name($producer_config->{topic});
                 $self->testrun->update;
         }
-        my @precond_array = Load($retval->{precondition_yaml});
+        my @precond_array = Load($producer_config->{precondition_yaml});
         return \@precond_array;
 }
 
