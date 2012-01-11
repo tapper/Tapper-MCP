@@ -302,8 +302,8 @@ file.
 
 sub  parse_grub
 {
-        my ($self, $config, $grub) = @_;
-        $config->{grub}=$grub->{config};
+        my ($self, $config, $precondition) = @_;
+        $config->{grub} = $precondition->{config};
         return $config;
 }
 
