@@ -719,13 +719,13 @@ sub grub_substitute_variables
         my $nfsroot            = $config->{paths}{nfsroot};
         my $kernel             = $config->{files}{installer_kernel};
         my $tftp_server        = $self->cfg->{tftp_server_address};
-        my $tftp_server        = $self->cfg->{grub_completion_HOSTOPTIONS}{$config->{hostname}} || $self->cfg->{grub_completion_HOSTOPTIONS}{_default};
+        my $hostoptions        = $self->cfg->{grub_completion_HOSTOPTIONS}{$config->{hostname}} || $self->cfg->{grub_completion_HOSTOPTIONS}{_default};
 
         $grubtext =~ s|\$TAPPER_OPTIONS\b|tapper_ip=$tapper_ip tapper_port=$tapper_port tapper_host=$tapper_host tapper_environment=$tapper_environment testrun=$testrun|g;
         $grubtext =~ s|\$TAPPER_NFSROOT\b|$nfsroot|g;
         $grubtext =~ s|\$TAPPER_TFTPSERVER\b|$tftp_server|g;
         $grubtext =~ s|\$TAPPER_KERNEL\b|$kernel|g;
-        $grubtext =~ s|\$HOSTOPTIONS\b|$consoleoptions|g;
+        $grubtext =~ s|\$HOSTOPTIONS\b|$hostoptions|g;
 
         return $grubtext;
 }
