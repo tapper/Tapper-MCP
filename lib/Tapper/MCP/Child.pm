@@ -115,20 +115,20 @@ sub generate_configs
         my ($self, $hostname ) = @_;
         my $retval;
 
-        my $producer = Tapper::MCP::Config->new($self->testrun);
+        my $mcpconfig = Tapper::MCP::Config->new($self->testrun);
 
         $self->log->debug("Create install config for $hostname");
-        my $config   = $producer->create_config();
+        my $config   = $mcpconfig->create_config();
         return $config if not ref($config) eq 'HASH';
 
-        $retval = $producer->write_config($config, "$hostname-install");
+        $retval = $mcpconfig->write_config($config, "$hostname-install");
         return $retval if $retval;
 
         if ($config->{autoinstall}) {
-                my $common_config = $producer->get_common_config();
+                my $common_config = $mcpconfig->get_common_config();
                 $common_config->{hostname} = $hostname;  # allows guest systems to know their host system name
 
-                my $testconfigs = $producer->get_test_config();
+                my $testconfigs = $mcpconfig->get_test_config();
                 return $testconfigs if not ref $testconfigs eq 'ARRAY';
 
                 for (my $i=0; $i<= $#{$testconfigs}; $i++ ){
@@ -136,11 +136,11 @@ sub generate_configs
                         $prc_config->{guest_number} = $i;
                         my $suffix = "test-prc$i";
 
-                        $retval = $producer->write_config($prc_config, "$hostname-$suffix");
+                        $retval = $mcpconfig->write_config($prc_config, "$hostname-$suffix");
                         return $retval if $retval;
                 }
         }
-        $self->mcp_info($producer->get_mcp_info());
+        $self->mcp_info($mcpconfig->get_mcp_info());
         $config->{hostname} = $hostname;
         return $config;
 }

@@ -302,8 +302,8 @@ file.
 
 sub  parse_grub
 {
-        my ($self, $config, $grub) = @_;
-        $config->{grub}=$grub->{config};
+        my ($self, $config, $precondition) = @_;
+        $config->{grub} = $precondition->{config};
         return $config;
 }
 
@@ -488,39 +488,8 @@ Get the text for grub config file at booting into installation.
 sub update_installer_grub
 {
         my ($self, $config)    = @_;
-        my $tapper_host        = $config->{mcp_host};
-        my $tapper_port        = $config->{mcp_port};
 
-        my $packed_ip          = gethostbyname($tapper_host);
-        if (not defined $packed_ip) {
-                return "Can not get an IP address for tapper_host ($tapper_host): $!";
-        }
-        my $tapper_ip          = inet_ntoa($packed_ip);
-
-        my $tapper_environment = Tapper::Config::_getenv();
-        my $testrun            = $config->{test_run};
-
-        if (not $config->{installer_grub} ) {
-
-                my $nfsroot     = $config->{paths}{nfsroot};
-                my $kernel      = $config->{files}{installer_kernel};
-                my $tftp_server = $self->cfg->{tftp_server_address};
-
-                $config->{installer_grub} = <<END;
-
-default 0
-timeout 2
-
-title Test
-     tftpserver $tftp_server
-     kernel $kernel earlyprintk=serial,ttyS0,115200 console=ttyS0,115200 root=/dev/nfs ro ip=dhcp nfsroot=$nfsroot \$TAPPER_OPTIONS
-END
-        }
-
-        my $installer_grub        =  $config->{installer_grub};
-        $config->{installer_grub} =~
-          s|\$TAPPER_OPTIONS|tapper_ip=$tapper_ip tapper_port=$tapper_port tapper_host=$tapper_host tapper_environment=$tapper_environment testrun=$testrun|g;
-
+        $config->{installer_grub} = $self->cfg->{mcp}{installer}{default_grub} if not $config->{installer_grub};
         return $config;
 }
 
@@ -540,15 +509,15 @@ sub produce
 {
         my ($self, $config, $precondition) = @_;
         my $producer = Tapper::Producer->new();
-        my $retval = $producer->produce($self->testrun->testrun_scheduling, $precondition);
+        my $producer_config = $producer->produce($self->testrun->testrun_scheduling, $precondition);
 
-        return $retval if not ref($retval) eq 'HASH';
+        return $producer_config if not ref($producer_config) eq 'HASH';
 
-        if ($retval->{topic}) {
-                $self->testrun->topic_name($retval->{topic});
+        if ($producer_config->{topic}) {
+                $self->testrun->topic_name($producer_config->{topic});
                 $self->testrun->update;
         }
-        my @precond_array = Load($retval->{precondition_yaml});
+        my @precond_array = Load($producer_config->{precondition_yaml});
         return \@precond_array;
 }
 
@@ -735,6 +704,32 @@ sub parse_precondition
         return $config;
 }
 
+# replace $TAPPER_PLACEHOLDERS in grub config file
+sub grub_substitute_variables
+{
+        my ($self, $config, $grubtext) = @_;
+
+        my $tapper_host        = $config->{mcp_host};
+        my $tapper_port        = $config->{mcp_port};
+        my $packed_ip          = gethostbyname($tapper_host);
+        die "Can not get an IP address for tapper_host ($tapper_host): $!" if not defined $packed_ip;
+        my $tapper_ip          = inet_ntoa($packed_ip);
+        my $tapper_environment = Tapper::Config::_getenv();
+        my $testrun            = $config->{test_run};
+        my $nfsroot            = $config->{paths}{nfsroot};
+        my $kernel             = $config->{files}{installer_kernel};
+        my $tftp_server        = $self->cfg->{tftp_server_address};
+        my $hostoptions        = $self->cfg->{grub_completion_HOSTOPTIONS}{$config->{hostname}} || $self->cfg->{grub_completion_HOSTOPTIONS}{_default};
+
+        $grubtext =~ s|\$TAPPER_OPTIONS\b|tapper_ip=$tapper_ip tapper_port=$tapper_port tapper_host=$tapper_host tapper_environment=$tapper_environment testrun=$testrun|g;
+        $grubtext =~ s|\$TAPPER_NFSROOT\b|$nfsroot|g;
+        $grubtext =~ s|\$TAPPER_TFTPSERVER\b|$tftp_server|g;
+        $grubtext =~ s|\$TAPPER_KERNEL\b|$kernel|g;
+        $grubtext =~ s|\$HOSTOPTIONS\b|$hostoptions|g;
+
+        return $grubtext;
+}
+
 =head2 get_install_config
 
 Add installation configuration part to a given config hash.
@@ -779,6 +774,12 @@ sub get_install_config
                 $prc_precondition->{precondition_type} = "prc";
                 push(@{$config->{preconditions}}, $prc_precondition);
         }
+
+        $config->{grub} = $self->cfg->{mcp}{test}{default_grub} if not $config->{grub};
+
+        eval { $config->{installer_grub} = $self->grub_substitute_variables($config, $config->{installer_grub}) } if $config->{installer_grub}; return $@ if $@;
+        eval { $config->{grub}           = $self->grub_substitute_variables($config, $config->{grub}) }           if $config->{grub};           return $@ if $@;
+
         return $config;
 }
 
