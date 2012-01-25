@@ -101,7 +101,7 @@ Set interrupt handlers for important signals. No parameters, no return values.
 
                 # give me a stack trace when ^C
                 $SIG{INT} = sub {
-                        $SIG{INT}  = 'ignore'; # not reentrant, don't handle signal twice
+                        $SIG{INT}  = 'ignore'; # make handler reentrant, don't handle signal twice
 
                         # stop all children
                         $SIG{CHLD} = 'ignore';
