@@ -195,6 +195,7 @@ sub handle_error
         my $headerlines = $self->mcp_headerlines();
         my $results     = [{ error => 1, msg => $error_msg, comment => $error_comment}];
         my ($error, $report_id) = $self->tap_report_send($results, $headerlines);
+        $self->upload_files($report_id, $self->testrun->id);
         return $error;
 }
 
