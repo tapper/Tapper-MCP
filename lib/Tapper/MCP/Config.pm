@@ -18,7 +18,7 @@ use Tapper::Model 'model';
 use Tapper::Config;
 use Tapper::MCP::Info;
 use Tapper::Producer;
-
+use Try::Tiny;
 
 extends 'Tapper::MCP::Control';
 
@@ -501,7 +501,8 @@ Calls the producer for the given precondition
 @param hash ref - precondition
 
 @return success - array ref containing preconditions
-@return error   - error string
+
+@throws die()
 
 =cut
 
@@ -511,7 +512,7 @@ sub produce
         my $producer = Tapper::Producer->new();
         my $producer_config = $producer->produce($self->testrun->testrun_scheduling, $precondition);
 
-        return $producer_config if not ref($producer_config) eq 'HASH';
+        die $producer_config if not ref($producer_config) eq 'HASH';
 
         if ($producer_config->{topic}) {
                 $self->testrun->topic_name($producer_config->{topic});
@@ -538,7 +539,8 @@ old one. In case of success the updated config is returned.
 sub parse_produce_precondition
 {
         my ($self, $config, $precondition) = @_;
-        my $produced_preconditions = $self->produce($config, $precondition->precondition_as_hash);
+
+        my $produced_preconditions = try {$self->produce($config, $precondition->precondition_as_hash)} catch {return $_};
 
         return $produced_preconditions
           unless ref($produced_preconditions) eq 'ARRAY';
@@ -585,7 +587,7 @@ sub produce_preconds_in_arrayref
 
         foreach my $precondition ( @$preconditions ) {
                 if ($precondition->{precondition_type} eq 'produce') {
-                        my $produced_preconditions = $self->produce($config, $precondition);
+                        my $produced_preconditions = try {$self->produce($config, $precondition)} catch {return $_};
                         push @new_preconds, @$produced_preconditions;
                 } else {
                         push @new_preconds, $precondition;
@@ -625,15 +627,13 @@ sub produce_virt_precondition
                                         return $error if $error;
                                 } elsif (ref($producer->{$key}) eq 'HASH' and
                                          $producer->{$key}->{precondition_type} eq 'produce') {
-                                        my $produced_preconditions = $self->produce($config, $producer->{$key});
+                                        my $produced_preconditions = try {$self->produce($config, $producer->{$key})} catch {return $_};
                                         $producer->{$key} = $produced_preconditions->[0];
                                 }
                         }
                 }
         }
-
         return $precondition;
-
 }
 
 
@@ -664,7 +664,7 @@ sub parse_precondition
                 when( 'virt' ) {
                         $precondition = $self->produce_virt_precondition($config, $precondition);
                         return $precondition unless ref $precondition eq 'HASH';
-                        
+
 
                         $precondition_result->precondition(Dump($precondition));
                         $precondition_result->update;
@@ -777,8 +777,8 @@ sub get_install_config
 
         $config->{grub} = $self->cfg->{mcp}{test}{default_grub} if not $config->{grub};
 
-        eval { $config->{installer_grub} = $self->grub_substitute_variables($config, $config->{installer_grub}) } if $config->{installer_grub}; return $@ if $@;
-        eval { $config->{grub}           = $self->grub_substitute_variables($config, $config->{grub}) }           if $config->{grub};           return $@ if $@;
+        $config->{installer_grub} = try { $self->grub_substitute_variables($config, $config->{installer_grub}) } catch { return $_} if $config->{installer_grub};
+        $config->{grub}           = try { $self->grub_substitute_variables($config, $config->{grub}) } catch { return $_} if ($config->{grub});
 
         return $config;
 }
@@ -837,10 +837,9 @@ sub get_common_config
                                 print $fh $self->testrun->scenario_element->peer_elements->count;
                                 close $fh;
                         }       # else trust the creator
-                        eval {
+                        try {
                                 YAML::DumpFile($config->{files}{sync_file}, \@peers);
-                        };
-                        return $@ if $@;
+                        } catch { return $_};
                 }
         }
         return ($config);
