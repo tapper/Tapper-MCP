@@ -257,7 +257,7 @@ sub parse_virt_preconditions
                 use warnings;
 
                 push @{$config->{preconditions}}, $guest->{root} if $guest->{root}->{precondition_type};
-                push @{$config->{preconditions}}, $guest->{config};
+                push @{$config->{preconditions}}, $guest->{config} if exists $guest->{config}->{precondition_type};
                 if ($guest->{config}->{svm}) {
                         push @{$config->{prcs}->[0]->{config}->{guests}}, {svm=>$guest->{config}->{svm}};
                 } elsif ($guest->{config}->{kvm}) {
