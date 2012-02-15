@@ -273,6 +273,7 @@ sub parse_virt_preconditions
 
                 # put guest preconditions into precondition list
                 foreach my $guest_precondition(@{$guest->{preconditions}}) {
+                        $config = $self->handle_guest_tests($config, $guest, $guest_number);
                         $guest_precondition->{mountpartition} = $guest->{mountpartition};
                         $guest_precondition->{mountfile} = $guest->{mountfile} if $guest->{mountfile};
                         push @{$config->{preconditions}}, $guest_precondition;
