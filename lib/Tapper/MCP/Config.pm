@@ -142,13 +142,6 @@ Create guest PRC config based on guest tests.
 sub handle_guest_tests
 {
         my ($self, $config, $guest, $guest_number) = @_;
-        $config = $self->add_tapper_package_for_guest($config, $guest, $guest_number);
-        return $config unless ref $config eq 'HASH';
-
-        $config->{prcs}->[$guest_number]->{mountfile} = $guest->{mountfile};
-        $config->{prcs}->[$guest_number]->{mountpartition} = $guest->{mountpartition};
-        $config->{prcs}->[$guest_number]->{config}->{guest_number} = $guest_number;
-
 
         $config = $self->parse_testprogram($config, $guest->{testprogram}, $guest_number)
           if $guest->{testprogram};
@@ -279,6 +272,13 @@ sub parse_virt_preconditions
                         push @{$config->{preconditions}}, $guest_precondition;
                 }
 
+                # add a PRC for every guest
+                $config = $self->add_tapper_package_for_guest($config, $guest, $guest_number);
+                return $config unless ref $config eq 'HASH';
+
+                $config->{prcs}->[$guest_number]->{mountfile} = $guest->{mountfile};
+                $config->{prcs}->[$guest_number]->{mountpartition} = $guest->{mountpartition};
+                $config->{prcs}->[$guest_number]->{config}->{guest_number} = $guest_number;
         }
         $config->{prcs}->[0]->{config}->{guest_count} = int @{$virt->{guests} || []};
 
