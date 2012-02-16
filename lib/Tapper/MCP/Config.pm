@@ -657,7 +657,7 @@ sub parse_precondition
 
         given($precondition->{precondition_type}){
                 when('produce') {
-                        ($config, undef) = $self->parse_produce_precondition($config, $precondition_result);
+                        $config = $self->parse_produce_precondition($config, $precondition_result);
                 }
                 when('image' ) {
                         $config = $self->parse_image_precondition($config, $precondition);
