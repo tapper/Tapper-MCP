@@ -9,6 +9,7 @@ class Tapper::MCP::Master extends Tapper::MCP
         use IO::Handle;
         use Log::Log4perl;
         use POSIX ":sys_wait_h";
+        use Try::Tiny;
         use UNIVERSAL;
 
 
@@ -270,6 +271,31 @@ Read console log from a handle and write it to the appropriate file.
                 return 0;
         }
 
+=head2 notify_event
+
+Inform the notification framework that an event occured in MCP.
+
+@param string - event name
+@param hash ref - message
+
+=cut
+
+        sub notify_event
+        {
+                my ($self, $event, $message) = @_;
+                try
+                {
+                        my $new_event = model('ReportsDB')->resultset('NotificationEvent')->new({event => $event,
+                                                                                                 message => $message,
+                                                                                                });
+                        $new_event->insert();
+                } catch {
+                        $self->log->error("Unable notify user of event $event: $_") if $@;
+                };
+                
+                return;
+        }
+
 
 =head2 run_due_tests
 
@@ -309,6 +335,8 @@ Run the tests that are due.
                                 $retval = $child->runtest_handling( $system, $revive );
                         };
                         $retval = $@ if $@;
+
+                        $self->notify_event('testrun_finished', {testrun_id => 42});
 
                         if ( ($retval or $child->rerun) and $job->testrun->rerun_on_error) {
                                 my $cmd  = Tapper::Cmd::Testrun->new();
