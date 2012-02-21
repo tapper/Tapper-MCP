@@ -169,7 +169,7 @@ Parse host definition of a virt precondition and change config accordingly
 sub parse_virt_host
 {
         my ($self, $config, $virt) = @_;
-        given ($virt->{host}->{root}->{precondition_type}) {
+        given (lc($virt->{host}->{root}->{precondition_type})) {
                 when ('image') {
                         $config = $self->parse_image_precondition($config, $virt->{host}->{root});
                 }
@@ -587,7 +587,7 @@ sub produce_preconds_in_arrayref
           unless ref $preconditions eq 'ARRAY';
 
         foreach my $precondition ( @$preconditions ) {
-                if ($precondition->{precondition_type} eq 'produce') {
+                if (lc($precondition->{precondition_type}) eq 'produce') {
                         my $produced_preconditions = try {$self->produce($config, $precondition)} catch {return $_};
                         push @new_preconds, @$produced_preconditions;
                 } else {
@@ -616,7 +616,7 @@ sub produce_virt_precondition
 {
         my ($self, $config, $precondition) = @_;
         local $Data::DPath::USE_SAFE; # path not from user, Safe.pm deactivated for debug and speed
-        my $producers = $precondition ~~ dpath '//*[key eq "precondition_type" and value eq "produce"]/../..';
+        my $producers = $precondition ~~ dpath '//*[key eq "precondition_type" and lc(value) eq "produce"]/../..';
         foreach my $producer (@$producers) {
                 if (ref $producer eq 'ARRAY') {
                         my $error = $self->produce_preconds_in_arrayref($config, $producer);
@@ -627,7 +627,7 @@ sub produce_virt_precondition
                                         my $error = $self->produce_preconds_in_arrayref($config, $producer->{$key});
                                         return $error if $error;
                                 } elsif (ref($producer->{$key}) eq 'HASH' and
-                                         $producer->{$key}->{precondition_type} eq 'produce') {
+                                         lc($producer->{$key}->{precondition_type}) eq 'produce') {
                                         my $produced_preconditions = try {$self->produce($config, $producer->{$key})} catch {return $_};
                                         $producer->{$key} = $produced_preconditions->[0];
                                 }
@@ -655,7 +655,7 @@ sub parse_precondition
         my ($self, $config, $precondition_result) = @_;
         my $precondition = $precondition_result->precondition_as_hash;
 
-        given($precondition->{precondition_type}){
+        given(lc($precondition->{precondition_type})){
                 when('produce') {
                         $config = $self->parse_produce_precondition($config, $precondition_result);
                 }
