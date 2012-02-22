@@ -541,7 +541,9 @@ sub parse_produce_precondition
 {
         my ($self, $config, $precondition) = @_;
 
-        my $produced_preconditions = try {$self->produce($config, $precondition->precondition_as_hash)} catch {return $_};
+        my $error;
+        my $produced_preconditions = try {$self->produce($config, $precondition->precondition_as_hash)} catch {$error = $_};
+        return $error if $error;
 
         return $produced_preconditions
           unless ref($produced_preconditions) eq 'ARRAY';
@@ -583,12 +585,14 @@ sub produce_preconds_in_arrayref
         my ($self, $config, $preconditions) = @_;
         my @new_preconds;
 
+        my $error;
         return "Did not receive an array ref for 'produce_preconds_in_arrayref'"
           unless ref $preconditions eq 'ARRAY';
 
         foreach my $precondition ( @$preconditions ) {
                 if (lc($precondition->{precondition_type}) eq 'produce') {
-                        my $produced_preconditions = try {$self->produce($config, $precondition)} catch {return $_};
+                        my $produced_preconditions = try {$self->produce($config, $precondition)} catch {$error = $_};
+                        return $error if $error;
                         push @new_preconds, @$produced_preconditions;
                 } else {
                         push @new_preconds, $precondition;
@@ -628,7 +632,9 @@ sub produce_virt_precondition
                                         return $error if $error;
                                 } elsif (ref($producer->{$key}) eq 'HASH' and
                                          lc($producer->{$key}->{precondition_type}) eq 'produce') {
-                                        my $produced_preconditions = try {$self->produce($config, $producer->{$key})} catch {return $_};
+                                        my $error;
+                                        my $produced_preconditions = try {$self->produce($config, $producer->{$key})} catch {$error = $_};
+                                        return $error if $error;
                                         $producer->{$key} = $produced_preconditions->[0];
                                 }
                         }
@@ -778,9 +784,11 @@ sub get_install_config
 
         $config->{grub} = $self->cfg->{mcp}{test}{default_grub} if not $config->{grub};
 
-        $config->{installer_grub} = try { $self->grub_substitute_variables($config, $config->{installer_grub}) } catch { return $_} if $config->{installer_grub};
-        $config->{grub}           = try { $self->grub_substitute_variables($config, $config->{grub}) } catch { return $_} if ($config->{grub});
-
+        my $error;
+        $config->{installer_grub} = try { $self->grub_substitute_variables($config, $config->{installer_grub}) }
+          catch { $error = $_} if $config->{installer_grub}; return $error if $error;
+        $config->{grub}           = try { $self->grub_substitute_variables($config, $config->{grub}) }
+          catch { $error = $_} if ($config->{grub}); return $error if $error;
         return $config;
 }
 
@@ -838,9 +846,12 @@ sub get_common_config
                                 print $fh $self->testrun->scenario_element->peer_elements->count;
                                 close $fh;
                         }       # else trust the creator
+                        my $error;
                         try {
                                 YAML::DumpFile($config->{files}{sync_file}, \@peers);
-                        } catch { return $_};
+                        } catch { $error = $_};
+                        return $error if $error;
+
                 }
         }
         return ($config);
