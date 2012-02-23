@@ -142,13 +142,6 @@ Create guest PRC config based on guest tests.
 sub handle_guest_tests
 {
         my ($self, $config, $guest, $guest_number) = @_;
-        $config = $self->add_tapper_package_for_guest($config, $guest, $guest_number);
-        return $config unless ref $config eq 'HASH';
-
-        $config->{prcs}->[$guest_number]->{mountfile} = $guest->{mountfile};
-        $config->{prcs}->[$guest_number]->{mountpartition} = $guest->{mountpartition};
-        $config->{prcs}->[$guest_number]->{config}->{guest_number} = $guest_number;
-
 
         $config = $self->parse_testprogram($config, $guest->{testprogram}, $guest_number)
           if $guest->{testprogram};
@@ -176,7 +169,7 @@ Parse host definition of a virt precondition and change config accordingly
 sub parse_virt_host
 {
         my ($self, $config, $virt) = @_;
-        given ($virt->{host}->{root}->{precondition_type}) {
+        given (lc($virt->{host}->{root}->{precondition_type})) {
                 when ('image') {
                         $config = $self->parse_image_precondition($config, $virt->{host}->{root});
                 }
@@ -257,7 +250,7 @@ sub parse_virt_preconditions
                 use warnings;
 
                 push @{$config->{preconditions}}, $guest->{root} if $guest->{root}->{precondition_type};
-                push @{$config->{preconditions}}, $guest->{config};
+                push @{$config->{preconditions}}, $guest->{config} if exists $guest->{config}->{precondition_type};
                 if ($guest->{config}->{svm}) {
                         push @{$config->{prcs}->[0]->{config}->{guests}}, {svm=>$guest->{config}->{svm}};
                 } elsif ($guest->{config}->{kvm}) {
@@ -273,11 +266,19 @@ sub parse_virt_preconditions
 
                 # put guest preconditions into precondition list
                 foreach my $guest_precondition(@{$guest->{preconditions}}) {
+                        $config = $self->handle_guest_tests($config, $guest, $guest_number);
                         $guest_precondition->{mountpartition} = $guest->{mountpartition};
                         $guest_precondition->{mountfile} = $guest->{mountfile} if $guest->{mountfile};
                         push @{$config->{preconditions}}, $guest_precondition;
                 }
 
+                # add a PRC for every guest
+                $config = $self->add_tapper_package_for_guest($config, $guest, $guest_number);
+                return $config unless ref $config eq 'HASH';
+
+                $config->{prcs}->[$guest_number]->{mountfile} = $guest->{mountfile};
+                $config->{prcs}->[$guest_number]->{mountpartition} = $guest->{mountpartition};
+                $config->{prcs}->[$guest_number]->{config}->{guest_number} = $guest_number;
         }
         $config->{prcs}->[0]->{config}->{guest_count} = int @{$virt->{guests} || []};
 
@@ -540,7 +541,9 @@ sub parse_produce_precondition
 {
         my ($self, $config, $precondition) = @_;
 
-        my $produced_preconditions = try {$self->produce($config, $precondition->precondition_as_hash)} catch {return $_};
+        my $error;
+        my $produced_preconditions = try {$self->produce($config, $precondition->precondition_as_hash)} catch {$error = $_};
+        return $error if $error;
 
         return $produced_preconditions
           unless ref($produced_preconditions) eq 'ARRAY';
@@ -582,12 +585,14 @@ sub produce_preconds_in_arrayref
         my ($self, $config, $preconditions) = @_;
         my @new_preconds;
 
+        my $error;
         return "Did not receive an array ref for 'produce_preconds_in_arrayref'"
           unless ref $preconditions eq 'ARRAY';
 
         foreach my $precondition ( @$preconditions ) {
-                if ($precondition->{precondition_type} eq 'produce') {
-                        my $produced_preconditions = try {$self->produce($config, $precondition)} catch {return $_};
+                if (lc($precondition->{precondition_type}) eq 'produce') {
+                        my $produced_preconditions = try {$self->produce($config, $precondition)} catch {$error = $_};
+                        return $error if $error;
                         push @new_preconds, @$produced_preconditions;
                 } else {
                         push @new_preconds, $precondition;
@@ -615,7 +620,7 @@ sub produce_virt_precondition
 {
         my ($self, $config, $precondition) = @_;
         local $Data::DPath::USE_SAFE; # path not from user, Safe.pm deactivated for debug and speed
-        my $producers = $precondition ~~ dpath '//*[key eq "precondition_type" and value eq "produce"]/../..';
+        my $producers = $precondition ~~ dpath '//*[key eq "precondition_type" and lc(value) eq "produce"]/../..';
         foreach my $producer (@$producers) {
                 if (ref $producer eq 'ARRAY') {
                         my $error = $self->produce_preconds_in_arrayref($config, $producer);
@@ -626,8 +631,10 @@ sub produce_virt_precondition
                                         my $error = $self->produce_preconds_in_arrayref($config, $producer->{$key});
                                         return $error if $error;
                                 } elsif (ref($producer->{$key}) eq 'HASH' and
-                                         $producer->{$key}->{precondition_type} eq 'produce') {
-                                        my $produced_preconditions = try {$self->produce($config, $producer->{$key})} catch {return $_};
+                                         lc($producer->{$key}->{precondition_type}) eq 'produce') {
+                                        my $error;
+                                        my $produced_preconditions = try {$self->produce($config, $producer->{$key})} catch {$error = $_};
+                                        return $error if $error;
                                         $producer->{$key} = $produced_preconditions->[0];
                                 }
                         }
@@ -654,9 +661,9 @@ sub parse_precondition
         my ($self, $config, $precondition_result) = @_;
         my $precondition = $precondition_result->precondition_as_hash;
 
-        given($precondition->{precondition_type}){
+        given(lc($precondition->{precondition_type})){
                 when('produce') {
-                        ($config, undef) = $self->parse_produce_precondition($config, $precondition_result);
+                        $config = $self->parse_produce_precondition($config, $precondition_result);
                 }
                 when('image' ) {
                         $config = $self->parse_image_precondition($config, $precondition);
@@ -777,9 +784,11 @@ sub get_install_config
 
         $config->{grub} = $self->cfg->{mcp}{test}{default_grub} if not $config->{grub};
 
-        $config->{installer_grub} = try { $self->grub_substitute_variables($config, $config->{installer_grub}) } catch { return $_} if $config->{installer_grub};
-        $config->{grub}           = try { $self->grub_substitute_variables($config, $config->{grub}) } catch { return $_} if ($config->{grub});
-
+        my $error;
+        $config->{installer_grub} = try { $self->grub_substitute_variables($config, $config->{installer_grub}) }
+          catch { $error = $_} if $config->{installer_grub}; return $error if $error;
+        $config->{grub}           = try { $self->grub_substitute_variables($config, $config->{grub}) }
+          catch { $error = $_} if ($config->{grub}); return $error if $error;
         return $config;
 }
 
@@ -837,9 +846,12 @@ sub get_common_config
                                 print $fh $self->testrun->scenario_element->peer_elements->count;
                                 close $fh;
                         }       # else trust the creator
+                        my $error;
                         try {
                                 YAML::DumpFile($config->{files}{sync_file}, \@peers);
-                        } catch { return $_};
+                        } catch { $error = $_};
+                        return $error if $error;
+
                 }
         }
         return ($config);
