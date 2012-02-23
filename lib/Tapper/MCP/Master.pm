@@ -320,14 +320,14 @@ Run the tests that are due.
                                         $self->log->error($@);
                                 } else {
                                         $self->log->debug("Restarted testrun $id with new id $new_id because ".
-                                                          "an error occured and rerun_on_error was ".
+                                                          "an error occurred and rerun_on_error was ".
                                                           $job->testrun->rerun_on_error);
                                 }
                         }
                         if ($retval) {
-                                $self->log->error("An error occured while trying to run testrun $id on $system: $retval");
+                                $self->log->error("Testrun $id ($system) error occurred: $retval");
                         } else {
-                                $self->log->info("Runtest $id finished successfully");
+                                $self->log->info("Testrun $id ($system) finished successfully");
                         }
                         exit 0;
                 } else {

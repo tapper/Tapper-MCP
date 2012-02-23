@@ -220,7 +220,7 @@ an info message is written to the log.
 sub ssh_reboot
 {
         my ($self, $host) = @_;
-        $self->log->info("Try reboot via ssh");
+        $self->log->info("Try reboot '$host' via ssh");
         my $ssh = Net::OpenSSH->new(
                                     host=>$host,
                                     user=>'root',
