@@ -3,14 +3,50 @@ package Tapper::MCP::Net::Reset::OSRC;
 use strict;
 use warnings;
 
+use File::Temp;
+use File::Spec;
+ 
 sub reset_host
 {
         my ($mcpnet, $host, $options) = @_;
 
-        $mcpnet->log->info("Try reboot via reset switch");
+        # essentiall simply call osrc_rst
+        #
+        # but additionally watch opentftp logs whether the host really
+        # requested it's install config so we know the RESET worked!
+        
+        $mcpnet->log->info("Try reboot '$host' via reset switch");
         my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
-        $mcpnet->log->info("trying $cmd");
-        my ($error, $retval) = $mcpnet->log_and_exec($cmd);
+        my ($error, $retval);
+
+        # several possible TFTP daemons and logs, choose the one with latest write access
+        my $log = `ls -1rt /opt/opentftp/log/opentftp*.log /var/log/atftpd.log | tail -1`; chomp $log;
+
+        my $logbefore =
+         File::Temp
+                  ->new(TEMPLATE => "osrcreset-tftplog-before-XXXXXX", DIR => File::Spec->tmpdir)
+                   ->filename;
+ TRY:
+        for my $try (1..3)
+        {
+                # store tftp log before reset
+                $mcpnet->log_and_exec("cp $log $logbefore");
+
+                $mcpnet->log->info("(try $try: $host) $cmd");
+                ($error, $retval) = $mcpnet->log_and_exec($cmd);
+
+                # watch tftp log for $host entries which signal successful reset
+                for my $check (1..18) # 18 * 10sec sleep == 180sec per try
+                {
+                        # check every 10 seconds to early catch success
+                        sleep 10;
+                        $mcpnet->log->info("(try $try: $host, check $check)");
+                        if (system("diff -u $logbefore $log | grep -q '+.*$host'") == 0) {
+                                $mcpnet->log->info("(try $try: $host) reset succeeded");
+                                last TRY;
+                        }
+                }
+        }
         return ($error, $retval);
 }
 
