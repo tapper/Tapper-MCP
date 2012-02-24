@@ -112,7 +112,7 @@ sub reset_host
         for my $try (1..3)
         {
                 # watch tftp log for $host entries which signal successful reset
-                for my $check (1..18) # 18 * 10sec sleep == 180sec per try
+                for my $check (1..36) # 36 * 10sec sleep == 360sec (6min) per try
                 {
                         # check every 10 seconds to early catch success
                         sleep 10;
