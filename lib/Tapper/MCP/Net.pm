@@ -10,7 +10,6 @@ use Moose;
 use Socket;
 use Net::SSH;
 use Net::SCP;
-use Net::OpenSSH;
 use IO::Socket::INET;
 use Sys::Hostname;
 use File::Basename;
@@ -205,45 +204,6 @@ sub install_client_package
         return 0;
 }
 
-=head2 ssh_reboot
-
-Try to reboot the remote system using ssh. In case this is not possible
-an info message is written to the log.
-
-@param string - host name
-
-@return success - true
-@return error   - false
-
-=cut
-
-sub ssh_reboot
-{
-        my ($self, $host) = @_;
-        $self->log->info("Try reboot '$host' via ssh");
-        my $ssh = Net::OpenSSH->new(
-                                    host=>$host,
-                                    user=>'root',
-                                    password=>$self->cfg->{testmachine_password},
-                                    timeout=> '10',
-                                    kill_ssh_on_timeout => 1,
-                                    master_opts => [ -o => 'StrictHostKeyChecking=no',
-                                                     -o => 'UserKnownHostsFile=/dev/null' ]);
-        if ($ssh->error) {
-                $self->log->info("Couldn't establish SSH connection: ". $ssh->error);
-                return;
-        }
-
-        my $output;
-        $output = $ssh->capture("reboot");
-
-        if ($ssh->error) {
-                $self->log->info("Can not reboot $host with SSH: $output");
-                return
-        } else {
-                return 1;
-        }
-}
 
 
 =head2 reboot_system
@@ -268,14 +228,6 @@ sub reboot_system
         my ($self, $host, $hard) = @_;
 	$self->log->debug("Trying to reboot $host.");
 
-        ## Some machines do not boot up correctly after a shutdown with
-        ## ssh and reboot (e.g. because they do not even shut down correctly
-        ## waiting for services like NFS to shut down).
-        if (not $hard) {
-                return 0 if $self->ssh_reboot($host);
-        }
-
-        # else trigger reset switch
 
         my $reset_plugin         = $self->cfg->{reset_plugin};
         my $reset_plugin_options = $self->cfg->{reset_plugin_options};
