@@ -93,10 +93,8 @@ sub reset_host
 {
         my ($mcpnet, $host, $options) = @_;
 
-        ssh_reboot($mcpnet, $host, $options);
-        
-        my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
         my ($error, $retval);
+        my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
 
         # several possible TFTP daemons and logs, choose the one with latest write access
         my $log = `ls -1rt /opt/opentftp/log/opentftp*.log /var/log/atftpd.log | tail -1`; chomp $log;
@@ -105,6 +103,11 @@ sub reset_host
          File::Temp
                   ->new(TEMPLATE => "osrcreset-tftplog-before-XXXXXX", DIR => File::Spec->tmpdir)
                    ->filename;
+
+        # store tftp log before reboot
+        $mcpnet->log_and_exec("cp $log $logbefore");
+        ssh_reboot($mcpnet, $host, $options);
+
  TRY:
         for my $try (1..3)
         {
