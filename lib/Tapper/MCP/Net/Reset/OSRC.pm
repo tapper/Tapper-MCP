@@ -94,8 +94,6 @@ sub reset_host
 
         $mcpnet->log->info("Try reboot '$host' via SSH");
 
-        return (0, undef) if ssh_reboot($mcpnet, $host, $options);
-        
         $mcpnet->log->info("Try reboot '$host' via reset switch");
         my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
         my ($error, $retval);
