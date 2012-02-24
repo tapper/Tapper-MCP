@@ -93,11 +93,8 @@ sub reset_host
 {
         my ($mcpnet, $host, $options) = @_;
 
-        $mcpnet->log->info("Try reboot '$host' via SSH");
-
         ssh_reboot($mcpnet, $host, $options);
         
-        $mcpnet->log->info("Try reboot '$host' via reset switch");
         my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
         my ($error, $retval);
 
@@ -122,6 +119,7 @@ sub reset_host
                                 last TRY;
                         }
                 }
+                $mcpnet->log->info("Try reboot '$host' via reset switch");
                 # store tftp log before reset
                 $mcpnet->log_and_exec("cp $log $logbefore");
 
