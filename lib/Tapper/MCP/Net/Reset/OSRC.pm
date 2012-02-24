@@ -25,6 +25,7 @@ To use it add the following config to your Tapper config file:
 
  reset_plugin: OSRC
  reset_plugin_options:
+   testmachine_password: verysecret
 
 This configures Tapper MCP to use the OSRC plugin for reset and
 leaves configuration empty.
@@ -56,7 +57,7 @@ sub ssh_reboot
                                     master_opts => [ -o => 'StrictHostKeyChecking=no',
                                                      -o => 'UserKnownHostsFile=/dev/null' ]);
         if ($ssh->error) {
-                $mcpnet->log->info("Couldn't establish SSH connection: ". $ssh->error);
+                $mcpnet->log->info("Could not establish SSH connection to '$host': ". $ssh->error);
                 return;
         }
 
@@ -64,7 +65,7 @@ sub ssh_reboot
         $output = $ssh->capture("reboot");
 
         if ($ssh->error) {
-                $mcpnet->log->info("Can not reboot $host with SSH: $output");
+                $mcpnet->log->info("Can not reboot '$host' with SSH: $output");
                 return;
         } else {
                 return 1;
@@ -94,6 +95,8 @@ sub reset_host
 
         $mcpnet->log->info("Try reboot '$host' via SSH");
 
+        ssh_reboot($mcpnet, $host, $options);
+        
         $mcpnet->log->info("Try reboot '$host' via reset switch");
         my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
         my ($error, $retval);
