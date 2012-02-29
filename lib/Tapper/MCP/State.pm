@@ -113,6 +113,7 @@ sub is_msg_valid
         my ($self, $msg) = @_;
 
         return 1 if $msg->{state} eq 'quit';
+        return 1 if $self->valid_states->{$msg->{state}} eq 'ALL';
         if (not $self->state_details->current_state eq any(@{$self->valid_states->{$msg->{state}}})){
                 my $result =
                 {
