@@ -250,6 +250,43 @@ sub get_report_array
         return $self->mcp_info->{report} // [];
 }
 
+=head2 set_keep_alive_timeout
+
+Setter for timeout span for keep-alive handling. We need an explizit
+setter because a single setter/getter function could not distinguish
+between called as getter and called to set undef.
+
+@param int - timeout span for keep-alive handling
+
+@return new value of keep-alive timeout
+
+=cut
+
+sub set_keep_alive_timeout
+{
+        my ($self, $timeout) = @_;
+        $self->mcp_info->{keep_alive}{timeout_span} = $timeout;
+        return $self->mcp_info->{keep_alive}{timeout_span};
+}
+
+=head2 keep_alive_timeout
+
+Getter/Setter for timeout span for keep-alive handling. If you need to
+set the timeout to an undefined value please use set_keep_alive_timeout.
+
+@optparam int - timeout span for keep-alive handling
+
+@return (new) value of keep-alive timeout
+
+=cut
+
+sub keep_alive_timeout
+{
+        my ($self, $timeout) = @_;
+        $self->mcp_info->{keep_alive}{timeout_span} = $timeout if defined $timeout;
+        return $self->mcp_info->{keep_alive}{timeout_span};
+}
+
 
 =head2 test_type
 
@@ -275,6 +312,7 @@ sub get_state_config
 {
         my ($self) = @_;
         my $state = {
+                     keep_alive => { timeout_span => $self->mcp_info->{keep_alive}{timeout_span}, timeout_date => undef},
                      current_state => 'started',
                      results => [],
                      install => { timeout_boot_span    => $self->get_installer_timeout || $self->cfg->{times}{boot_timeout},
