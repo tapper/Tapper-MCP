@@ -859,21 +859,6 @@ sub get_common_config
 }
 
 
-=head2 get_mcp_info
-
-Returns mcp_info attribute, no matter if its already set.
-
-@return hash reference
-
-=cut
-
-sub get_mcp_info
-{
-        my ($self) = @_;
-
-        return $self->mcp_info;
-}
-
 
 =head2 get_test_config
 

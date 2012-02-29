@@ -69,7 +69,7 @@ cmp_deeply($config->{preconditions},
 is($config->{installer_stop}, 1, 'installer_stop');
 
 
-my $info = $producer->get_mcp_info();
+my $info = $producer->mcp_info;
 isa_ok($info, 'Tapper::MCP::Info', 'mcp_info');
 my @timeout = $info->get_testprogram_timeouts(1);
 is_deeply(\@timeout,[36000],'Timeout for testprogram in PRC 1');
@@ -79,7 +79,7 @@ $config = $producer->create_config();
 is(ref($config),'HASH', 'Config created');
 is($config->{preconditions}->[3]->{config}->{max_reboot}, 2, 'Reboot test');
 
-$info = $producer->get_mcp_info();
+$info = $producer->mcp_info;
 isa_ok($info, 'Tapper::MCP::Info', 'mcp_info');
 my $timeout = $info->get_boot_timeout(0);
 is($timeout, 5, 'Timeout booting PRC 0');
