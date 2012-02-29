@@ -52,8 +52,6 @@ Read all pending messages from database. Try no more than timeout seconds
 @return success - Resultset class countaining all available messages
 @return timeout - Resultset class countaining zero messages
 
-
-
 =cut
 
 sub get_messages
