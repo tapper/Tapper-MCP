@@ -757,6 +757,11 @@ sub get_install_config
         my $retval = $self->mcp_info->add_prc(0, $self->cfg->{times}{boot_timeout});
         return $retval if $retval;
 
+        {
+                no warnings 'uninitialized'; # allowing this timeout to be undef is a feature
+                $retval    = $self->mcp_info->set_keep_alive_timeout($self->cfg->{times}{keep_alive_timeout});
+        }
+
  PRECONDITION:
         foreach my $precondition_result ( $self->testrun->ordered_preconditions) {
                 $config = $self->parse_precondition($config, $precondition_result);
