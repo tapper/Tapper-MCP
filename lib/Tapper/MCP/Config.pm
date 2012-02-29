@@ -714,6 +714,7 @@ sub parse_precondition
 # replace $TAPPER_PLACEHOLDERS in grub config file
 sub grub_substitute_variables
 {
+        no warnings 'uninitialized'; # some options may not be set, especially during testing. This is ok.
         my ($self, $config, $grubtext) = @_;
 
         my $tapper_host        = $config->{mcp_host};
