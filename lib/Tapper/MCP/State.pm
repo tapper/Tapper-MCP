@@ -293,8 +293,8 @@ sub update_test_timeout
         my $now = time();
 
         if ($self->state_details->current_state ~~ 'reboot_test') {
-                my $prc0_timeout = $self->state_details->prc_timeout_current_date(0);
-                if ( $prc0_timeout <= $now) {
+                my $prc0_timeout_date = $self->state_details->prc_timeout_current_date(0);
+                if ( $prc0_timeout_date <= $now) {
                         my $msg = 'Timeout while booting testmachine';
                         $self->state_details->prc_results(0, {error => 1, msg => $msg});
                         $self->state_details->results({error => 1, msg => $msg});
@@ -302,10 +302,10 @@ sub update_test_timeout
                         return (1, undef);
                 }
                 else {
-                        return (0, $prc0_timeout - $now);
+                        return (0, $prc0_timeout_date - $now);
                 }
         }
-        my $new_timeout;
+        my $new_timeout_span;
         # we need the PRC number, thus not foreach
  PRC:
         for (my $prc_num = 0; $prc_num < $self->state_details->prc_count; $prc_num++) {
@@ -319,12 +319,12 @@ sub update_test_timeout
                                         $self->state_details->prc_state($prc_num, 'finished');
                                 }
                                 else {
-                                        $new_timeout = mindef($new_timeout,
+                                        $new_timeout_span = mindef($new_timeout_span,
                                                                $self->state_details->prc_timeout_current_date($prc_num) - time());
                                 }
                         }
                         when ( ['test', 'lasttest'] ) {
-                                $new_timeout = mindef($new_timeout, $self->update_prc_timeout($prc_num));
+                                $new_timeout_span = mindef($new_timeout_span, $self->update_prc_timeout($prc_num));
                         }
 
                 }
@@ -335,8 +335,9 @@ sub update_test_timeout
                 return (1, undef);
         }
 
-        return (0, $new_timeout);
+        return (0, $new_timeout_span);
 }
+
 
 =head2 update_timeouts
 
@@ -380,8 +381,8 @@ waiting for the first message.
 sub msg_takeoff
 {
         my ($self) = @_;
-        my $timeout = $self->state_details->takeoff();
-        return (0, $timeout);
+        my $timeout_span = $self->state_details->takeoff();
+        return (0, $timeout_span);
 }
 
 
@@ -494,7 +495,7 @@ sub msg_error_guest
         my $nr = $msg->{prc_number};
 
         $self->state_details->prc_state($nr, 'finished');
-        
+
         my $result = { error => 1,
                        msg   => "Starting guest $nr failed: ".$msg->{error},
                      };
