@@ -739,6 +739,11 @@ sub next_state
         my $valid = $self->is_msg_valid($msg);
         return if not $valid;
 
+        ########################################################################################################################
+        #
+        # FIXME! return values of all msg_* functions is ignored. This is ok, but why do they generate a return value then?
+        #
+        #######################################################################################################################
         given ($msg->{state}) {
                 when ('quit')              { ($error, $timeout_span) = $self->msg_quit($msg)           };
                 when ('takeoff')           { ($error, $timeout_span) = $self->msg_takeoff($msg)           };
