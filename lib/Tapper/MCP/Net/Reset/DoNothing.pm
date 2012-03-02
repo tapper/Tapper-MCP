@@ -3,6 +3,10 @@ package Tapper::MCP::Net::Reset::DoNothing;
 use strict;
 use warnings;
 
+use Moose;
+extends 'Tapper::Base';
+
+
 sub reset_host
 {
         my ($self, $host, $options) = @_;

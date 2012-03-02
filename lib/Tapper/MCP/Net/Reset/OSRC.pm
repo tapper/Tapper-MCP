@@ -6,6 +6,9 @@ use warnings;
 use File::Temp;
 use File::Spec;
 use Net::OpenSSH;
+use Moose;
+
+extends 'Tapper::Base';
 
 
 =head1 NAME
@@ -46,8 +49,8 @@ an info message is written to the log.
 
 sub ssh_reboot
 {
-        my ($mcpnet, $host, $options) = @_;
-        $mcpnet->log->info("Try reboot '$host' via ssh");
+        my ($self, $host, $options) = @_;
+        $self->log->info("Try reboot '$host' via ssh");
         my $ssh = Net::OpenSSH->new(
                                     host=>$host,
                                     user=>'root',
@@ -57,7 +60,7 @@ sub ssh_reboot
                                     master_opts => [ -o => 'StrictHostKeyChecking=no',
                                                      -o => 'UserKnownHostsFile=/dev/null' ]);
         if ($ssh->error) {
-                $mcpnet->log->info("Could not establish SSH connection to '$host': ". $ssh->error);
+                $self->log->info("Could not establish SSH connection to '$host': ". $ssh->error);
                 return;
         }
 
@@ -65,7 +68,7 @@ sub ssh_reboot
         $output = $ssh->capture("reboot");
 
         if ($ssh->error) {
-                $mcpnet->log->info("Can not reboot '$host' with SSH: $output");
+                $self->log->info("Can not reboot '$host' with SSH: $output");
                 return;
         } else {
                 return 1;
@@ -91,7 +94,7 @@ whether the reset really worked.
  
 sub reset_host
 {
-        my ($mcpnet, $host, $options) = @_;
+        my ($self, $host, $options) = @_;
 
         my ($error, $retval);
         my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
@@ -105,8 +108,8 @@ sub reset_host
                    ->filename;
 
         # store tftp log before reboot
-        $mcpnet->log_and_exec("cp $log $logbefore");
-        ssh_reboot($mcpnet, $host, $options);
+        $self->log_and_exec("cp $log $logbefore");
+        ssh_reboot($self, $host, $options);
 
  TRY:
         for my $try (1..3)
@@ -116,18 +119,18 @@ sub reset_host
                 {
                         # check every 10 seconds to early catch success
                         sleep 10;
-                        $mcpnet->log->info("(try $try: $host, check $check)");
+                        $self->log->info("(try $try: $host, check $check)");
                         if (system("diff -u $logbefore $log | grep -q '+.*$host'") == 0) {
-                                $mcpnet->log->info("(try $try: $host) reset succeeded");
+                                $self->log->info("(try $try: $host) reset succeeded");
                                 last TRY;
                         }
                 }
-                $mcpnet->log->info("Try reboot '$host' via reset switch");
+                $self->log->info("Try reboot '$host' via reset switch");
                 # store tftp log before reset
-                $mcpnet->log_and_exec("cp $log $logbefore");
+                $self->log_and_exec("cp $log $logbefore");
 
-                $mcpnet->log->info("(try $try: $host) $cmd");
-                ($error, $retval) = $mcpnet->log_and_exec($cmd);
+                $self->log->info("(try $try: $host) $cmd");
+                ($error, $retval) = $self->log_and_exec($cmd);
         }
         return ($error, $retval);
 }

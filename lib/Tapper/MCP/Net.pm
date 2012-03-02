@@ -239,8 +239,9 @@ sub reboot_system
                 return "Could not load $reset_class";
         } else {
                 no strict 'refs'; ## no critic
-                $self->log->info("Call ${reset_class}::reset_host($host)");
-                my ($error, $retval) = &{"${reset_class}::reset_host"}($self, $host, $reset_plugin_options);
+                $self->log->debug("Call $reset_class->reset_host($host, $reset_plugin_options)");
+                my $reset_object = $reset_class->new();
+                my ($error, $retval) = $reset_object->reset_host($host, $reset_plugin_options);
                 if ($error) {
                         $self->log->error("Error occured: ".$retval);
                         return $retval;

@@ -3,14 +3,18 @@ package Tapper::MCP::Net::Reset::Exec;
 use strict;
 use warnings;
 
+use Moose;
+extends 'Tapper::Base';
+
+
 sub reset_host
 {
-        my ($mcpnet, $host, $options) = @_;
+        my ($self, $host, $options) = @_;
 
-        $mcpnet->log->info("Try reboot via Exec");
+        $self->log->info("Try reboot via Exec");
         my $cmd = $options->{command}." $host";
-        $mcpnet->log->info("trying $cmd");
-        my ($error, $retval) = $mcpnet->log_and_exec($cmd);
+        $self->log->info("trying $cmd");
+        my ($error, $retval) = $self->log_and_exec($cmd);
         return ($error, $retval);
 }
 
@@ -41,7 +45,7 @@ leaves configuration empty.
 
 =head1 FUNCTIONS
 
-=head2 reset_host ($mcpnet, $host, $options)
+=head2 reset_host ($self, $host, $options)
 
 The primary plugin function.
 

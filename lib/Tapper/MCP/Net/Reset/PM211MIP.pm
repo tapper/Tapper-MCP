@@ -4,12 +4,15 @@ use strict;
 use warnings;
 
 use LWP::UserAgent;
+use Moose;
+
+extends 'Tapper::Base';
 
 sub reset_host
 {
-        my ($mcpnet, $host, $options) = @_;
+        my ($self, $host, $options) = @_;
 
-        $mcpnet->log->info("Reboot via Infratec PM211MIP multi-socket outlet");
+        $self->log->info("Reboot via Infratec PM211MIP multi-socket outlet");
 
         my $ip       = $options->{ip};
         my $user     = $options->{user};
@@ -21,14 +24,14 @@ sub reset_host
 
         my $ua = LWP::UserAgent->new;
 
-        $mcpnet->log->info("turn off '$host' via $uri_off");
+        $self->log->info("turn off '$host' via $uri_off");
         my $response1 = $ua->get($uri_off)->decoded_content;
 
         my $sleep = 5;
-        $mcpnet->log->info("sleep $sleep seconds");
+        $self->log->info("sleep $sleep seconds");
         sleep $sleep;
 
-        $mcpnet->log->info("turn on '$host' via $uri_on");
+        $self->log->info("turn on '$host' via $uri_on");
         my $response2 = $ua->get($uri_on)->decoded_content;
 
         my $error  = $response1 =~ /Done\./ && $response2 =~ /Done\./ ? 0 : 1;
@@ -70,7 +73,7 @@ outlet number 0 and the host C<sarahconnor> on outlet number 1.
 
 =head1 FUNCTIONS
 
-=head2 reset_host ($mcpnet, $host, $options)
+=head2 reset_host ($self, $host, $options)
 
 The primary plugin function.
 
