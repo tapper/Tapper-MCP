@@ -831,7 +831,12 @@ sub next_state
                 when ('keep-alive')        { ($error, $timeout_span) = $self->msg_keep_alive($msg)        };
                                 # (TODO) add default
         }
-
+        
+        # every message resets the keep-alive timeout
+        if (defined($self->state_details->keep_alive_timeout_span)) {
+                $self->state_details->keep_alive_timeout_date( $self->state_details->keep_alive_timeout_span + time() );
+        }
+        
         return (1);
 }
 
