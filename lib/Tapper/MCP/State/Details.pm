@@ -94,6 +94,7 @@ sub state_init
         $self->state_details->{current_state} = 'started';
         $self->state_details->{results} = [];
         $self->state_details->{prcs} ||= [];
+        $self->state_details->{keep_alive}{timeout_date} = $self->state_details->{keep_alive}{timeout_span} + time if defined $self->state_details->{keep_alive}{timeout_span};
         foreach my $this_prc (@{$self->state_details->{prcs}}) {
                 $this_prc->{results} ||= [];
         }
@@ -159,6 +160,59 @@ sub set_all_prcs_current_state
                 $self->db_update;
         }
 }
+
+=head2 keep_alive_timeout_date
+
+Getter and setter for keep_alive_timeout_date
+
+@optparam int - new timeout_date for keep_alive
+
+@return int - timeout date for keep_alive
+
+=cut
+
+sub keep_alive_timeout_date
+{
+        my ($self, $timeout_date) = @_;
+        $self->state_details->{keep_alive}{timeout_date} = $timeout_date if defined $timeout_date;
+        $self->state_details->{keep_alive}{timeout_date};
+}
+
+
+
+=head2 set_keep_alive_timeout_span
+
+Getter for keep_alive_timeout_date
+
+@param int  - new timeout date for keep_alive
+
+@return int - new timeout date for keep_alive
+
+=cut
+
+sub set_keep_alive_timeout_span
+{
+        my ($self, $timeout_span) = @_;
+        $self->state_details->{keep_alive}{timeout_date} = $timeout_span;
+}
+
+=head2 keep_alive_timeout_span
+
+Getter and setter for keep_alive_timeout_span.
+Note: This function can not set the timeout to undef.
+
+@optparam int - new timeout_span
+
+@return int - timeout date for keep_alive
+
+=cut
+
+sub keep_alive_timeout_span
+{
+        my ($self) = @_;
+        return $self->state_details->{keep_alive}{timeout_span};
+}
+
 
 =head2 installer_timeout_current_date
 

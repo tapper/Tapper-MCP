@@ -10,6 +10,7 @@ use Perl6::Junction qw/any/;
 
 use Tapper::MCP::State::Details;
 use Tapper::Model 'model';
+use Class::Load ':all';
 
 has state_details => (is => 'rw',
                       default => sub { {current_state => 'invalid'} }
@@ -32,6 +33,17 @@ has cfg => (is => 'rw',
            isa => 'HashRef',
            default => sub {{}},
            );
+has callbacks => (is => 'ro',
+                  lazy => 1,
+                  default => sub { my $self  = shift;
+                                   my $class = "Tapper::MCP::State::Plugin::";
+                                   $class   .= $self->cfg->{mcp_callback_handler}{plugin};
+                                   load_class($class);
+                                   $class->new($self->cfg)
+                           },
+                 );
+
+
 
 
 has valid_states  => (is => 'ro',
@@ -47,7 +59,8 @@ has valid_states  => (is => 'ro',
                                                 'error-testprogram' => ['testing'],
                                                 'end-testprogram'   => ['testing'],
                                                 'reboot'            => ['testing'],
-                                                }
+                                                'keep-alive'        => ['ALL'],
+                                               }
                                }
                      );
 
@@ -82,6 +95,7 @@ sub BUILD
         my ($self, $args) = @_;
 
         $self->state_details(Tapper::MCP::State::Details->new({testrun_id => $args->{testrun_id}}));
+
 }
 
 =head1 NAME
@@ -172,19 +186,22 @@ in reads.
 sub get_current_timeout_span
 {
         my ($self) = @_;
-        my $new_timeout;
+        my $new_timeout_date;
+        my $keep_alive_timeout_date = $self->state_details->keep_alive_timeout_date;
         given ($self->state_details->current_state){
-                when(['invalid', 'finished', 'started']){ return 60;}
-                when(['reboot_install', 'installing']){$new_timeout = $self->state_details->installer_timeout_current_date }
-                when('reboot_test'){ $new_timeout = $self->state_details->prc_timeout_current_date(0)}
+                when(['invalid', 'finished', 'started']){ $new_timeout_date = time + 60;}
+                when(['reboot_install', 'installing']){$new_timeout_date = $self->state_details->installer_timeout_current_date }
+                when('reboot_test'){ $new_timeout_date = $self->state_details->prc_timeout_current_date(0)}
                 when('testing'){
-                        $new_timeout = $self->state_details->prc_timeout_current_date(0);
+                        $new_timeout_date = $self->state_details->prc_timeout_current_date(0);
                         for (my $prc_num = 1; $prc_num < $self->state_details->prc_count; $prc_num++) {
-                                $new_timeout = mindef($new_timeout, $self->state_details->prc_timeout_current_date($prc_num));
+                                $new_timeout_date = mindef($new_timeout_date, $self->state_details->prc_timeout_current_date($prc_num));
                         }
                 }
         }
-        return $new_timeout - time();
+
+
+        return (mindef($new_timeout_date, $keep_alive_timeout_date)  - time);
 }
 
 =head2 state_init
@@ -339,6 +356,35 @@ sub update_test_timeout
 }
 
 
+=head2 update_keep_alive_timeout
+
+Check whether keep-alive timeout has ended and if so, act accordingly.
+
+@return success - (0, timeout span for next state change)
+@return error   - (1, undef)
+
+=cut
+
+sub update_keep_alive_timeout
+{
+        my ($self) = @_;
+        return (0, undef) if not defined $self->state_details->keep_alive_timeout_span;
+        my $timeout_cpan = $self->state_details->keep_alive_timeout_date - time();
+        if ($timeout_cpan > 0) {
+                return (0, $timeout_cpan);
+        } else {
+                if (not $self->cfg->{keep_alive}{plugin}) {
+                        my $result = { error => 1,
+                                       msg   => "No plugin defined in keep_alive. I deactivate keep-alive for this testrun."};
+                        $self->state_details->results($result);
+                        $self->state_details->set_keep_alive_timeout_span( undef );
+                        return (0, undef);
+                }
+                return $self->callbacks->execute('keep_alive',$self->state_details);
+        }
+}
+
+
 =head2 update_timeouts
 
 Update the timeouts in $self->state_details structure.
@@ -348,14 +394,15 @@ Update the timeouts in $self->state_details structure.
 
 =cut
 
-sub update_timeouts
-{
+sub update_timeouts {
         my ($self) = @_;
+        my ( $error, $timeout_span );
+
         given($self->state_details->current_state){
                 when ( ['started', 'reboot_install', 'installing'] ) {
-                        return $self->update_installer_timeout() }
+                        ( $error, $timeout_span) =  $self->update_installer_timeout() }
                 when ( ['reboot_test','testing'] ) {
-                        return $self->update_test_timeout() }
+                        ( $error, $timeout_span) =  $self->update_test_timeout() }
                 when ('finished')               {
                         return( 1, undef) } # no timeout handling when finished
                 default {
@@ -363,9 +410,13 @@ sub update_timeouts
                         $msg   .= $self->state_details->current_state;
                         $msg   .= ' during update_timeouts';
                         $self->state_details->results({error => 1, msg => $msg});
+                        return( 1, undef);
                 }
         }
-        return (1, undef);
+
+        my ( $alive_error, $alive_timeout_span ) = $self->update_keep_alive_timeout();
+        return ($1, undef) if $error or $alive_error;
+        return (0, mindef($alive_timeout_span, $timeout_span));
 
 }
 
@@ -720,6 +771,24 @@ sub msg_quit
         return (1, undef);
 }
 
+=head2 msg_keep_alive
+
+Handle message keep-alive. This function does not return anything
+because the caller ignores the return value anyway.
+
+@param hash ref - message
+
+=cut
+
+sub msg_keep_alive
+{
+        my ($self) = @_;
+        if (defined($self->state_details->keep_alive_timeout_span)) {
+                $self->state_details->keep_alive_timeout_date( $self->state_details->keep_alive_timeout_span + time() );
+        }
+        return;
+}
+
 
 =head2 next_state
 
@@ -759,6 +828,7 @@ sub next_state
                 when ('error-testprogram') { ($error, $timeout_span) = $self->msg_error_testprogram($msg) };
                 when ('end-testprogram')   { ($error, $timeout_span) = $self->msg_end_testprogram($msg)   };
                 when ('reboot')            { ($error, $timeout_span) = $self->msg_reboot($msg)            };
+                when ('keep-alive')        { ($error, $timeout_span) = $self->msg_keep_alive($msg)        };
                                 # (TODO) add default
         }
 
@@ -795,7 +865,7 @@ sub update_state
                 $self->next_state($msg_hash);
                 $msg_obj->delete;
 
-        } else {
+        } elsif (ref $msg_obj eq 'DBIx::Class::ResultSet'){
                 foreach my $msg_result ($msg_obj->all) {
                         my $msg_hash = $msg_result->message;
                         my ($success ) = $self->next_state($msg_hash);
