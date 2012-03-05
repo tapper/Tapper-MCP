@@ -759,7 +759,10 @@ sub get_install_config
 
         {
                 no warnings 'uninitialized'; # allowing this timeout to be undef is a feature
-                $retval    = $self->mcp_info->set_keep_alive_timeout($self->cfg->{times}{keep_alive_timeout});
+                $retval    = $self->mcp_info->set_keep_alive_timeout($self->cfg->{keep_alive}{timeout_receive});
+                $config->{times}{keep_alive_timeout} = $self->cfg->{keep_alive}{timeout_send};
+                $config->{mcp_callback_handler}{plugin} = $self->cfg->{mcp_callback_handler}{plugin};
+                $config->{mcp_callback_handler}{plugin_plugin} = $self->cfg->{mcp_callback_handler}{plugin_options};
         }
 
  PRECONDITION:
