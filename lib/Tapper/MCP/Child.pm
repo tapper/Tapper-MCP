@@ -138,7 +138,7 @@ sub generate_configs
                         return $retval if $retval;
                 }
         }
-        $self->mcp_info($mcpconfig->get_mcp_info());
+        $self->mcp_info($mcpconfig->mcp_info());
         $config->{hostname} = $hostname;
         return $config;
 }
