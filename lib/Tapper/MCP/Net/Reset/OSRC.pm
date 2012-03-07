@@ -109,7 +109,7 @@ sub reset_host
 
         # store tftp log before reboot
         $self->log_and_exec("cp $log $logbefore");
-        ssh_reboot($self, $host, $options);
+        $self->ssh_reboot( $host, $options );
 
  TRY:
         for my $try (1..3)
