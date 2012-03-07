@@ -36,10 +36,11 @@ has cfg => (is => 'rw',
 has callbacks => (is => 'ro',
                   lazy => 1,
                   default => sub { my $self  = shift;
+                                   return if not $self->cfg->{mcp_callback_handler}{plugin};
                                    my $class = "Tapper::MCP::State::Plugin::";
                                    $class   .= $self->cfg->{mcp_callback_handler}{plugin};
                                    load_class($class);
-                                   $class->new($self->cfg)
+                                   $class->new({cfg => $self->cfg})
                            },
                  );
 
@@ -373,14 +374,14 @@ sub update_keep_alive_timeout
         if ($timeout_cpan > 0) {
                 return (0, $timeout_cpan);
         } else {
-                if (not $self->cfg->{keep_alive}{plugin}) {
+                if (not $self->callbacks) {
                         my $result = { error => 1,
                                        msg   => "No plugin defined in keep_alive. I deactivate keep-alive for this testrun."};
                         $self->state_details->results($result);
                         $self->state_details->set_keep_alive_timeout_span( undef );
                         return (0, undef);
                 }
-                return $self->callbacks->execute('keep_alive',$self->state_details);
+                return $self->callbacks->keep_alive($self->state_details);
         }
 }
 

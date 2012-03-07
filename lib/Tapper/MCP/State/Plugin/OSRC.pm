@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Tapper::MCP::Net::Reset::OSRC;
 use Tapper::MCP::Net;  
+use Moose;
 
 
 has cfg => (is => 'rw',
@@ -13,7 +14,8 @@ has cfg => (is => 'rw',
 
 
 sub BUILD{
-        $self->cfg->{reset_remain} = $self->cfg->{mcp_callback_handler}{pluginoptions}{try_reset};
+        my ($self) = @_;
+        $self->cfg->{reset_remain} = $self->cfg->{mcp_callback_handler}{pluginoptions}{try_reset} || 0;
 }
 
 =head1 NAME
@@ -51,7 +53,7 @@ Handle keep_alive timeout.
 
 sub keep_alive
 {
-        my ($self, $state_details);
+        my ($self, $state_details) = @_;
         if ($self->cfg->{reset_remain} == 0) {
                 return (1, undef)
         }
@@ -62,7 +64,7 @@ sub keep_alive
         } else {
                 $options = $self->cfg->{mcp_callback_handler}{options}{reset_options};
         }
-        $resetter->reset_host($host, $options);
+        $resetter->reset_host($self->cfg->{hostname}, $options);
         $self->cfg->{reset_remain}--;
         return (0, $self->cfg->{keep_alive}{timeout_receive});
         
