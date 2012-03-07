@@ -99,5 +99,17 @@ is_deeply($result, [{
           'Missing keepalive plugin detected'
          );
 
+my $cfg = {mcp_callback_handler => {plugin => 'Dummy'},
+           hostname => 'iring',
+          };
+$state = Tapper::MCP::State->new(testrun_id => $testrun_id, cfg => $cfg);
+isa_ok($state, 'Tapper::MCP::State');
 
+$retval = $state->state_init($initial_state);
+($retval, $timeout) = $state->update_state(message_create({state => 'takeoff'}));
+ok($timeout <= 3, 'Keep_alive timeout returned'); # This test depends on the fact that there is less than 2 hours between state_init and update_state. Probably a reasonable assumption
+sleep(3);
+($retval, $timeout) = $state->update_state();
+$result = $state->state_details->results();
+is_deeply($result, [], 'No issues found for keep-alive');
 done_testing();
