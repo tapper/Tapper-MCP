@@ -266,10 +266,17 @@ sub parse_virt_preconditions
 
                 # put guest preconditions into precondition list
                 foreach my $guest_precondition(@{$guest->{preconditions}}) {
-                        $config = $self->handle_guest_tests($config, $guest, $guest_number);
-                        $guest_precondition->{mountpartition} = $guest->{mountpartition};
-                        $guest_precondition->{mountfile} = $guest->{mountfile} if $guest->{mountfile};
-                        push @{$config->{preconditions}}, $guest_precondition;
+                        if ( $guest_precondition->{precondition_type} eq 'testprogram' ) {
+                                $config = $self->parse_testprogram($config, $guest_precondition, $guest_number);
+                        } elsif ( $guest_precondition->{precondition_type} eq 'testprogram' ) {
+                                $config = $self->parse_testprogram_list($config, $guest_precondition, $guest_number);
+                        } else {
+                                $guest_precondition->{mountpartition} = $guest->{mountpartition};
+                                $guest_precondition->{mountfile} = $guest->{mountfile} if $guest->{mountfile};
+                                push @{$config->{preconditions}}, $guest_precondition;
+                        }
+                        return $config unless ref $config eq 'HASH';
+
                 }
 
                 # add a PRC for every guest
