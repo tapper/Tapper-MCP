@@ -6,7 +6,6 @@ use Tapper::MCP::Net::Reset::OSRC;
 use Tapper::MCP::Net;  
 use Moose;
 
-
 has cfg => (is => 'rw',
            isa => 'HashRef',
            default => sub {{}},
@@ -54,9 +53,13 @@ Handle keep_alive timeout.
 sub keep_alive
 {
         my ($self, $state_details) = @_;
-        if ($self->cfg->{reset_remain} == 0) {
-                return (1, undef)
-        }
+        
+        # try resetting only in reboot states
+        return (1, undef) if $state_details->current_state !~ m/reboot/;
+
+        return (1, undef) if $self->cfg->{reset_remain} == 0;
+
+
         my $resetter = Tapper::MCP::Net::Reset::OSRC->new();
         my $options;
         if ($self->cfg->{reset_plugin} eq 'OSRC') {
@@ -67,7 +70,6 @@ sub keep_alive
         $resetter->reset_host($self->cfg->{hostname}, $options);
         $self->cfg->{reset_remain}--;
         return (0, $self->cfg->{keep_alive}{timeout_receive});
-        
 }
 
 1;
