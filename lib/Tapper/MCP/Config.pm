@@ -276,7 +276,6 @@ sub parse_virt_preconditions
                                 push @{$config->{preconditions}}, $guest_precondition;
                         }
                         return $config unless ref $config eq 'HASH';
-
                 }
 
                 # add a PRC for every guest
