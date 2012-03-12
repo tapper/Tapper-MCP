@@ -14,6 +14,7 @@ use Tapper::MCP::Net;
 use Tapper::MCP::Config;
 use Tapper::Model 'model';
 use Tapper::MCP::State;
+use Devel::Backtrace;
 
 use constant BUFLEN     => 1024;
 use constant ONE_MINUTE => 60;
@@ -274,6 +275,15 @@ sub runtest_handling
 {
 
         my  ($self, $hostname, $revive) = @_;
+
+        $0 = "tapper-mcp-child-".$self->testrun->id;
+        $SIG{USR1} = sub {
+                local $SIG{USR1}  = 'ignore'; # make handler reentrant, don't handle signal twice
+                my $backtrace = Devel::Backtrace->new(-start=>2, -format => '%I. %s');
+                open my $fh, ">>", '/tmp/tapper-mcp-child-'.$self->testrun->id;
+                print $fh $backtrace;
+                close $fh;
+        };
 
         my $net    = Tapper::MCP::Net->new();
         $net->cfg->{testrun_id} = $self->testrun->id;
