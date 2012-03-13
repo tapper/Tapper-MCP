@@ -100,7 +100,10 @@ sub reset_host
         my $cmd = "/public/bin/osrc_rst_no_menu -f $host";
 
         # several possible TFTP daemons and logs, choose the one with latest write access
-        my $log = `ls -1rt /opt/opentftp/log/opentftp*.log /var/log/atftpd.log | tail -1`; chomp $log;
+        my $log = `ls -1rt /opt/opentftp/log/opentftp*.log* /var/log/atftpd.log* | tail -1`; chomp $log;
+        if (-z $log) {
+                $self->log->warn("TFTP log '$log' is zero size!");
+        }
 
         my $logbefore =
          File::Temp
@@ -119,7 +122,7 @@ sub reset_host
                 {
                         # check every 10 seconds to early catch success
                         sleep 10;
-                        $self->log->info("(try $try: $host, check $check)");
+                        $self->log->debug("(try $try: $host, check $check)");
                         if (system("diff -u $logbefore $log | grep -q '+.*$host'") == 0) {
                                 $self->log->info("(try $try: $host) reset succeeded");
                                 last TRY;
