@@ -236,7 +236,7 @@ sub start_testrun
                                 return ("Starting Tapper on testmachine with SSH failed: $ssh_retval");
                         }
                 }
-                default{
+                default {
                         $self->log->debug("Write grub file for $hostname");
                         my $grub_retval = $net->write_grub_file($hostname, $config->{installer_grub});
                         return $self->handle_error("Writing grub file", $grub_retval) if $grub_retval;
