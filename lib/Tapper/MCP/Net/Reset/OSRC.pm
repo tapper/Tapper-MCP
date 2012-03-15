@@ -60,7 +60,7 @@ sub ssh_reboot
                                     master_opts => [ -o => 'StrictHostKeyChecking=no',
                                                      -o => 'UserKnownHostsFile=/dev/null' ]);
         if ($ssh->error) {
-                $self->log->info("Could not establish SSH connection to '$host': ". $ssh->error);
+                $self->log->debug("Could not establish SSH connection to '$host': ". $ssh->error);
                 return;
         }
 
@@ -68,7 +68,7 @@ sub ssh_reboot
         $output = $ssh->capture("reboot");
 
         if ($ssh->error) {
-                $self->log->info("Can not reboot '$host' with SSH: $output");
+                $self->log->debug("Can not reboot '$host' with SSH: $output");
                 return;
         } else {
                 return 1;
@@ -135,7 +135,6 @@ sub reset_host
                 # store tftp log before reset
                 $self->log_and_exec("cp $log $logbefore");
 
-                $self->log->info("(try $try: $host) $cmd");
                 ($error, $retval) = $self->log_and_exec($cmd);
         }
         return ($error, $retval);
