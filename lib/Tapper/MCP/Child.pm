@@ -243,7 +243,10 @@ sub start_testrun
 
                         $self->log->debug("rebooting $hostname");
                         my $reboot_retval = $net->reboot_system($hostname);
-                        return $self->handle_error("Booting machine", $reboot_retval) if $reboot_retval;
+                        if ($reboot_retval) {
+                                $self->handle_error("Booting machine", $reboot_retval);
+                                return $reboot_retval;
+                        }
 
                         my ($error, $report) = $net->hw_report_create($self->testrun->id);
                         if ($error) {
