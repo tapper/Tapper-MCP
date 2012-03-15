@@ -115,9 +115,9 @@ sub reset_host
         $self->ssh_reboot( $host, $options ) or do {
                 $self->log->info("Try reboot '$host' via reset switch");
                 ($error, $retval) = $self->log_and_exec($cmd);
-        }
-
- TRY:
+        };
+          
+  TRY:
         for my $try (1..3)
         {
                 # watch tftp log for $host entries which signal successful reset
