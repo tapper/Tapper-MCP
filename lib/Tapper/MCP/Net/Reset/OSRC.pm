@@ -112,7 +112,10 @@ sub reset_host
 
         # store tftp log before reboot
         $self->log_and_exec("cp $log $logbefore");
-        $self->ssh_reboot( $host, $options );
+        $self->ssh_reboot( $host, $options ) or do {
+                $self->log->info("Try reboot '$host' via reset switch");
+                ($error, $retval) = $self->log_and_exec($cmd);
+        }
 
  TRY:
         for my $try (1..3)
