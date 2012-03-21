@@ -285,7 +285,7 @@ Inform the notification framework that an event occured in MCP.
                 my ($self, $event, $message) = @_;
                 try
                 {
-                        my $new_event = model('ReportsDB')->resultset('NotificationEvent')->new({event => $event,
+                        my $new_event = model('ReportsDB')->resultset('NotificationEvent')->new({type => $event,
                                                                                                  message => $message,
                                                                                                 });
                         $new_event->insert();
