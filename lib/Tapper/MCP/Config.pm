@@ -839,7 +839,7 @@ sub get_common_config
         $config->{testrun_id}                = $testrun->id;
 
         if ($testrun->testplan_id) {
-                $config->{testplan} = { id => $testrun->testplan_id, path => $testrun->testplan_instance->path};
+                $config->{testplan} = { id => $testrun->testplan_id, path => $testrun->testplan_instance->path };
         }
 
         if ($self->testrun->scenario_element) {
