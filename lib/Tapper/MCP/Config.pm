@@ -838,6 +838,10 @@ sub get_common_config
         $config->{test_run}                  = $testrun->id;
         $config->{testrun_id}                = $testrun->id;
 
+        if ($testrun->testplan_id) {
+                $config->{testplan} = { id => $testrun->testplan_id, path => $testrun->testplan_instance->path};
+        }
+
         if ($self->testrun->scenario_element) {
                 $config->{scenario_id} = $self->testrun->scenario_element->scenario_id;
                 my $path = $config->{paths}{sync_path}."/".$config->{scenario_id}."/";
