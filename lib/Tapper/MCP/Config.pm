@@ -62,9 +62,9 @@ sub parse_simnow_preconditions
         return $config;
 }
 
-=head2 parse_simnow_preconditions
+=head2 parse_hint_preconditions
 
-Parse a simnow precondition.
+Parse a hint precondition.
 
 @param hash ref - config
 @param hash ref - hint precondition
