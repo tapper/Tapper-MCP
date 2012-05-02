@@ -231,7 +231,7 @@ sub start_testrun
                           if $ssh_retval;
 
                         $ssh_retval = $net->start_ssh($hostname);
-                        if ($ssh_retval) { 
+                        if ($ssh_retval) {
                                 $self->handle_error("Starting Tapper on testmachine with SSH", $ssh_retval);
                                 return ("Starting Tapper on testmachine with SSH failed: $ssh_retval");
                         }
