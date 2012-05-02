@@ -187,6 +187,7 @@ sub install_client_package
         $dest_path .= "/tapper-clientpkg.tgz";
 
         my $arch = $package->{arch};
+        return "No architecture defined. Can not install client package" if not $arch;
         my $clientpkg = $self->cfg->{files}{tapper_package}{$arch};
 
         $clientpkg = $self->cfg->{paths}{package_dir}.$clientpkg
