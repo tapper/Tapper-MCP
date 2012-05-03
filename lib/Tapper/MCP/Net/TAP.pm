@@ -226,6 +226,7 @@ sub upload_files
                 $server->close();
                 unlink $file;
         }
+        rmdir foreach map { chomp ; $_ } `find $path -depth -type d`;
         rmdir $path;
         return 0;
 }
