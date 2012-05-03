@@ -224,7 +224,9 @@ sub upload_files
                 }
                 close($FH);
                 $server->close();
+                unlink $file;
         }
+        rmdir $path;
         return 0;
 }
 
