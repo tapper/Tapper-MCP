@@ -210,6 +210,7 @@ sub parse_virt_preconditions
         $config = $self->parse_testprogram($config, $virt->{host}->{testprogram}, 0) if $virt->{host}->{testprogram};
         $config = $self->parse_testprogram_list($config, $virt->{host}->{testprogram_list}, 0) if $virt->{host}->{testprogram_list};
         return $config unless ref($config) eq 'HASH';
+        my $total_guests = int @{$virt->{guests} || []};
 
         for (my $guest_number = 1; $guest_number <= int @{$virt->{guests} || []}; $guest_number++ ) {
                 my $guest = $virt->{guests}->[$guest_number-1];
@@ -285,6 +286,7 @@ sub parse_virt_preconditions
                 $config->{prcs}->[$guest_number]->{mountfile} = $guest->{mountfile};
                 $config->{prcs}->[$guest_number]->{mountpartition} = $guest->{mountpartition};
                 $config->{prcs}->[$guest_number]->{config}->{guest_number} = $guest_number;
+                $config->{prcs}->[$guest_number]->{config}->{total_guests} = $total_guests;
         }
         $config->{prcs}->[0]->{config}->{guest_count} = int @{$virt->{guests} || []};
 
