@@ -226,12 +226,14 @@ sub start_testrun
                 when('ssh') {
                         $self->log->debug("Starting SSH testrun on $hostname");
                         my $ssh_retval;
-                        $ssh_retval = $net->install_client_package($hostname, $config->{client_package});
-                        return $self->handle_error("Starting Tapper on testmachine with SSH", $ssh_retval)
-                          if $ssh_retval;
+                        if ($config->{client_package}) {
+                                $ssh_retval = $net->install_client_package($hostname, $config->{client_package});
+                                return $self->handle_error("Starting Tapper on testmachine with SSH", $ssh_retval)
+                                  if $ssh_retval;
+                        }
 
                         $ssh_retval = $net->start_ssh($hostname);
-                        if ($ssh_retval) { 
+                        if ($ssh_retval) {
                                 $self->handle_error("Starting Tapper on testmachine with SSH", $ssh_retval);
                                 return ("Starting Tapper on testmachine with SSH failed: $ssh_retval");
                         }

@@ -102,10 +102,10 @@ Set interrupt handlers for important signals. No parameters, no return values.
 
                 # give me a stack trace when ^C
                 $SIG{INT} = sub {
-                        $SIG{INT}  = 'ignore'; # make handler reentrant, don't handle signal twice
+                        $SIG{INT}  = 'IGNORE'; # make handler reentrant, don't handle signal twice
 
                         # stop all children
-                        $SIG{CHLD} = 'ignore';
+                        $SIG{CHLD} = 'IGNORE';
                         foreach my $this_child (keys %{$self->child}) {
                                 kill 15, $self->child->{$this_child}->{pid};
                         }
