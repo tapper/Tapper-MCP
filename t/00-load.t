@@ -31,5 +31,3 @@ plan tests => $#modules+1;
 foreach my $module(@modules) {
         require_ok($module);
 }
-
-diag( "Testing Tapper::MCP $Tapper::MCP::VERSION,Perl $], $^X" );
