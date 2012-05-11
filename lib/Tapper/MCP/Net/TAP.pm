@@ -198,8 +198,8 @@ sub upload_files
         my $host = $self->cfg->{report_server};
         my $port = $self->cfg->{report_api_port};
 
-        my $path = $self->cfg->{paths}{output_dir};
-        $path .= "/$testrunid/";
+        my $outputdir = $self->cfg->{paths}{output_dir};
+        my $path = "$outputdir/$testrunid/";
         return 0 unless -d $path;
         my @files=`find $path -type f`;
         $self->log->debug(@files);
@@ -224,10 +224,8 @@ sub upload_files
                 }
                 close($FH);
                 $server->close();
-                unlink $file;
         }
-        rmdir foreach map { chomp ; $_ } `find $path -depth -type d`;
-        rmdir $path;
+        system(qq{find "$outputdir" -maxdepth 1 -type d -mtime +30 -exec rm -fr \\{\\} \\;});
         return 0;
 }
 
