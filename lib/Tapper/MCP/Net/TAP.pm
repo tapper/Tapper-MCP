@@ -1,9 +1,8 @@
 package Tapper::MCP::Net::TAP;
 
+use 5.010;
 use strict;
 use warnings;
-
-use 5.010;
 
 use Moose::Role;
 

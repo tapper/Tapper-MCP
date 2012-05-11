@@ -1,9 +1,10 @@
-use MooseX::Declare;
-
-use 5.010;
-
 ## no critic (RequireUseStrict)
-class Tapper::MCP::Scheduler::Controller extends Tapper::Base with Tapper::MCP::Net::TAP {
+package Tapper::MCP::Scheduler::Controller;
+# ABSTRACT: Main class of the scheduler
+
+        use 5.010;
+        use Moose;
+        use base "Tapper::Base";
         use Tapper::Model 'model';
         use aliased 'Tapper::MCP::Scheduler::Algorithm';
         use aliased 'Tapper::MCP::Scheduler::PrioQueue';
@@ -24,6 +25,7 @@ class Tapper::MCP::Scheduler::Controller extends Tapper::Base with Tapper::MCP::
         has testrun   => (is => 'rw');
         has cfg       => (is => 'ro', default => sub {{}});
 
+        with "Tapper::MCP::Net::TAP";
 
 =head2
 
@@ -34,8 +36,9 @@ Check whether we need to change from scheduling white bandwidth to black bandwid
 
 =cut
 
-        method toggle_bandwith_color($free_hosts, $queue)
-        {
+        sub toggle_bandwith_color {
+                my ($self, $free_hosts, $queue) = @_;
+
                 return 0 if $queue->queued_testruns->count == 0;
                 foreach my $free_host( map {$_->{host} } @$free_hosts) {
                         if ($free_host->queuehosts->count){
@@ -65,7 +68,9 @@ fits any of the free hosts.
 
 =cut 
 
-        method get_next_job(Any %args) {
+        sub get_next_job {
+                my ($self, %args) = @_;
+
                 my ($queue, $job);
 
                 do {{
@@ -124,52 +129,20 @@ fits any of the free hosts.
                 return $job || () ;
         }
 
-        method mark_job_as_running ($job) {
+        sub mark_job_as_running {
+                my ($self, $job) = @_;
+
                 $job->testrun->starttime_testrun(model('TestrunDB')->storage->datetime_parser->format_datetime(DateTime->now));
                 $job->testrun->update();
                 $job->mark_as_running;
         }
 
-        method mark_job_as_finished ($job) {
+        sub mark_job_as_finished {
+                my ($self, $job) = @_;
+
                 $job->testrun->endtime_test_program(model('TestrunDB')->storage->datetime_parser->format_datetime(DateTime->now));
                 $job->testrun->update();
                 $job->mark_as_finished;
         }
-
-}
-
-{
-        # help the CPAN indexer
-        package Tapper::MCP::Scheduler::Controller;
-}
-
-
-=head1 NAME
-
-Tapper::MCP::Scheduler::Controller - Main class of the scheduler
-
-=head1 SYNOPSIS
-
-=head1 FUNCTIONS
-
-
-=head1 AUTHOR
-
-Maik Hentsche, C<< <maik.hentsche at amd.com> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-wfq at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WFQ>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
-=cut
 
 1; # End of Tapper::MCP::Scheduler::Controller

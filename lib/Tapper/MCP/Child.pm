@@ -1,4 +1,5 @@
 package Tapper::MCP::Child;
+# ABSTRACT: Control one specific testrun on MCP side
 
 use 5.010;
 use strict;
@@ -19,7 +20,6 @@ use Devel::Backtrace;
 use constant BUFLEN     => 1024;
 use constant ONE_MINUTE => 60;
 
-
 extends 'Tapper::MCP::Control';
 with 'Tapper::MCP::Net::TAP';
 
@@ -27,22 +27,13 @@ has state    => (is => 'rw');
 has mcp_info => (is => 'rw');
 has rerun    => (is => 'rw', default => 0);
 
-
-=head1 NAME
-
-Tapper::MCP::Child - Control one specific testrun on MCP side
-
 =head1 SYNOPSIS
 
  use Tapper::MCP::Child;
  my $client = Tapper::MCP::Child->new($testrun_id);
  $child->runtest_handling($system);
 
-
 =head1 FUNCTIONS
-
-
-
 
 =head2 get_messages
 
@@ -69,8 +60,6 @@ sub get_messages
         }
         return $messages;
 }
-
-
 
 =head2 wait_for_testrun
 
@@ -260,8 +249,6 @@ sub start_testrun
         }
         return 0;
 }
-
-
 
 =head2 runtest_handling
 

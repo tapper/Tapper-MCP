@@ -1,16 +1,16 @@
-use MooseX::Declare;
-
-use 5.010;
-
 ## no critic (RequireUseStrict)
-role Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm {
+package Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm;
+# ABSTRACT: Dummy algorithm for testing
 
+        use 5.010;
+        use Moose::Role;
         requires 'queues';
 
         has current_queue => (is => "rw");
 
-        method get_new_pos($Q)
-        {
+        sub get_new_pos {
+                my ($self, $Q) = @_;
+
                 my @Q = @$Q;
                 my %Q = map { $Q[$_] => $_ } 0..$#Q;
 
@@ -24,16 +24,18 @@ role Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm {
 
         }
 
-        method lookup_next_queue($queues)
-        {
+        sub lookup_next_queue {
+                my ($self, $queues) = @_;
+
                 my @Q = sort keys %{$queues};
                 my $pos = $self->get_new_pos(\@Q);
 
                 return $self->queues->{$Q[$pos]};
         }
 
-        method get_next_queue()
-        {
+        sub get_next_queue {
+                my ($self) = @_;
+
                 my @Q = sort keys %{$self->queues};
                 my $pos = $self->get_new_pos(\@Q);
                 
@@ -42,21 +44,16 @@ role Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm {
                 return $self->current_queue;
         }
         
-        method update_queue($Q)
-        {
+        sub update_queue {
+                my ($self, $Q) = @_;
+
                 $self->current_queue( $self->queues->{$Q->name} );
                 return 0;
         }
 
-}
-
 1; # End of Tapper::MCP::Scheduler::Algorithm::WFQ
 
 __END__
-
-=head1 NAME
-
-Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm  - Dummy algorithm for testing
 
 =head1 SYNOPSIS
 
@@ -69,17 +66,3 @@ Algorithm that returns queues in order it received it.
 Evaluate which client has to be scheduled next.
 
 @return success - client name;
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: proprietary
-
-
-=cut
-
