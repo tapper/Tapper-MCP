@@ -8,8 +8,9 @@ use YAML;
 
 use Tapper::Schema::TestTools;
 
-use Test::More;
+use Test::More 0.88;
 use Test::Deep;
+use Data::Dumper;
 
 BEGIN { use_ok('Tapper::MCP::Config'); }
 
@@ -58,6 +59,7 @@ cmp_deeply($config->{preconditions},
                                                          'timeout' => 36000,
                                                          },
                                                         ],
+                                    'total_guests' => 1,
                                     'guest_number' => 1,
                                    },
                        'mountpartition' => undef,
@@ -118,6 +120,7 @@ cmp_deeply($config->{preconditions},
                                                           timeout => 36000,
                                                          },
                                                         ],
+                                    'total_guests' => 1,
                                     'guest_number' => 1,
                                    },
                        'mountpartition' => undef,
@@ -207,6 +210,7 @@ cmp_deeply($config->{preconditions},
                                                           'timeout' => '36000',
                                                           }
                                                         ],
+                                    'total_guests' => 1,
                                     'guest_number' => 1
                                    },
                        'mountpartition' => undef,
