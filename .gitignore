@@ -21,7 +21,6 @@ MANIFEST
 META.yml
 MYMETA*
 t/file_upload/4/console
-t/file_upload/4/install/prove
 inc/
 Makefile
 
