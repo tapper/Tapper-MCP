@@ -5,8 +5,8 @@ class MFoo {
         use Data::Dumper;
 
         method hello(MUser $u) {
-                print STDERR Dumper($u);
-                print "HELLO ", $u->hotstuff, "\n";
+                #print STDERR Dumper($u);
+                print "# HELLO ", $u->hotstuff, "\n";
         }
 }
 
