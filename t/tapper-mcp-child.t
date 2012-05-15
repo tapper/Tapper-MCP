@@ -118,7 +118,7 @@ like($tap_reports[0],
           qr'1..1
 # Tapper-reportgroup-testrun: 113
 # Tapper-suite-name: Topic-Software
-# Tapper-suite-version: \d+.\d+
+# Tapper-suite-version: \d+[.\d]+
 # Tapper-machine-name: No hostname set
 # Tapper-section: MCP overview
 # Tapper-reportgroup-primary: 1
