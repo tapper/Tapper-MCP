@@ -1,7 +1,6 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
-        *** Tapper-MCP
         - *lots* of enhancements in whole automation layer
         - MCP is now a stop/resume-able state engine,
           based on event queues,
