@@ -66,7 +66,7 @@ fits any of the free hosts.
 @return success   - job object
 @return no job    - 0
 
-=cut 
+=cut
 
         sub get_next_job {
                 my ($self, %args) = @_;

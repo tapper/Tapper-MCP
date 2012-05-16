@@ -3,7 +3,7 @@ package Tapper::MCP::State::Plugin::OSRC;
 use strict;
 use warnings;
 use Tapper::MCP::Net::Reset::OSRC;
-use Tapper::MCP::Net;  
+use Tapper::MCP::Net;
 use Moose;
 
 has cfg => (is => 'rw',
@@ -53,7 +53,7 @@ Handle keep_alive timeout.
 sub keep_alive
 {
         my ($self, $state_details) = @_;
-        
+
         # try resetting only in reboot states
         return (1, undef) if $state_details->current_state !~ m/reboot/;
 

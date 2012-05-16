@@ -67,7 +67,7 @@ __END__
 
 Add a new queue to the scheduler.
 
-@param Scheduler::Queue - 
+@param Scheduler::Queue -
 
 @return success - 0
 @return error   - error string

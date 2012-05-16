@@ -53,14 +53,14 @@ sub initial_state
                                      'timeout_current_date' => undef,
                                      'results' => [],
                                      'current_state' => 'preload',
-                                     'timeout_testprograms_span' => [ $timeout_span ], 
+                                     'timeout_testprograms_span' => [ $timeout_span ],
                                     },
                                     {
                                      'timeout_boot_span' => $timeout_span,
                                      'timeout_current_date' => undef,
                                      'results' => [],
                                      'current_state' => 'preload',
-                                     'timeout_testprograms_span' => [ 1 ], 
+                                     'timeout_testprograms_span' => [ 1 ],
                                     },
                                    ],
                                      'results' => []
@@ -90,7 +90,7 @@ is_deeply($state->state_details->state_details->{results},
             'error' => 0
            }
           ], 'MCP results');
-          
+
 sleep 2; # make sure timeout of test0 in PRC1 hits
 my $message = model('TestrunDB')->resultset('Message')->search({message => 'does not exist' , testrun_id => 23});
 ($error, $timeout) = $state->update_state($message);

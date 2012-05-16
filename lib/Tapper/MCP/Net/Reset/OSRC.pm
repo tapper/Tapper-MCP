@@ -91,7 +91,7 @@ whether the reset really worked.
 @return error   - (1, error string)
 
 =cut
- 
+
 sub reset_host
 {
         my ($self, $host, $options) = @_;
@@ -116,7 +116,7 @@ sub reset_host
                 $self->log->info("Try reboot '$host' via reset switch");
                 ($error, $retval) = $self->log_and_exec($cmd);
         };
-          
+
   TRY:
         for my $try (1..3)
         {

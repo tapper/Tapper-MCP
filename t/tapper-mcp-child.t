@@ -114,7 +114,7 @@ not ok 1 - timeout hit while waiting for installation
 @tap_reports = ();
 $child      = Tapper::MCP::Child->new(113);
 $retval =  $child->runtest_handling('bullock');
-like($tap_reports[0], 
+like($tap_reports[0],
           qr'1..1
 # Tapper-reportgroup-testrun: 113
 # Tapper-suite-name: Topic-Software

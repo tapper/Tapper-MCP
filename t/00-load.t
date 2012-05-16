@@ -10,7 +10,7 @@ use MRO::Compat;
 
 use Test::More;
 
-my @modules = ('Tapper::MCP', 
+my @modules = ('Tapper::MCP',
                'Tapper::MCP::Child',
                'Tapper::MCP::Control',
                'Tapper::MCP::Config',

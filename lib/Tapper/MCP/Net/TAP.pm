@@ -22,7 +22,7 @@ sub prc_headerlines {
 
         my $testrun_id = $self->testrun->id;
         my $suitename =  ($prc_number > 0) ? "Guest-Overview-$prc_number" : "PRC0-Overview";
-        
+
         my $headerlines = [
                            "# Tapper-reportgroup-testrun: $testrun_id",
                            "# Tapper-suite-name: $suitename",
@@ -51,8 +51,8 @@ sub tap_report_away
         my ($self, $tap) = @_;
         my $reportid;
         if (my $sock = IO::Socket::INET->new(PeerAddr => $self->cfg->{report_server},
-					     PeerPort => $self->cfg->{report_port},
-					     Proto    => 'tcp')) {
+                                             PeerPort => $self->cfg->{report_port},
+                                             Proto    => 'tcp')) {
                 eval{
                         my $timeout = 100;
                         local $SIG{ALRM}=sub{die("timeout for sending tap report ($timeout seconds) reached.");};
@@ -62,10 +62,10 @@ sub tap_report_away
                 };
                 alarm(0);
                 $self->log->error($@) if $@;
-		close $sock;
-	} else {
+                close $sock;
+        } else {
                 return(1,"Can not connect to report server: $!");
-	}
+        }
         return (0,$reportid);
 
 }
@@ -119,7 +119,7 @@ Generate TAP header lines for the main MCP report.
 
 @param int - testrun id
 
-@return array ref - header lines 
+@return array ref - header lines
 
 =cut
 

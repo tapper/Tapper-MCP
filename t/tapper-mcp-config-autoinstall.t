@@ -69,7 +69,7 @@ fail("Can not get an IP address for tapper_host ($tapper_host): $!") if not defi
 my $tapper_ip   = inet_ntoa($packed_ip);
 
 ok(defined $config->{installer_grub}, 'Grub for installer set');
-is($config->{installer_grub}, 
+is($config->{installer_grub},
    "title opensuse 11.2\n".
    "kernel /tftpboot/kernel autoyast=bare.cfg tapper_ip=$tapper_ip tapper_port=11337 testrun=1 tapper_host=$tapper_host tapper_environment=test\n".
    "initrd /tftpboot/initrd\n",
@@ -118,11 +118,11 @@ my $testrun    = 1;
 my $child      = Tapper::MCP::Child->new($testrun);
 
 my $retval = $child->runtest_handling('dickstone');
-is ($grubtext, 'timeout 2
+is ($grubtext, "timeout 2
 
 title Boot from first hard disc
-	chainloader (hd0,1)+1
-',
+\tchainloader (hd0,1)+1
+",
     'Grubfile written');
 
 done_testing();

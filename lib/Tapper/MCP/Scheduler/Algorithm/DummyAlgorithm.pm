@@ -38,12 +38,12 @@ package Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm;
 
                 my @Q = sort keys %{$self->queues};
                 my $pos = $self->get_new_pos(\@Q);
-                
+
                 my $name = $Q[$pos];
                 $self->update_queue($self->queues->{$name});
                 return $self->current_queue;
         }
-        
+
         sub update_queue {
                 my ($self, $Q) = @_;
 

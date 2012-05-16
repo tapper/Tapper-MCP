@@ -288,7 +288,7 @@ Inform the notification framework that an event occured in MCP.
                 } catch {
                         $self->log->error("Unable notify user of event $event: $_");
                 };
-                
+
                 return;
         }
 

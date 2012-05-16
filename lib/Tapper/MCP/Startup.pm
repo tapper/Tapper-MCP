@@ -81,7 +81,7 @@ Registers all handled daemons in an array.
 
 sub set_servers
 {
-        my ($self) = @_; 
+        my ($self) = @_;
         $self->servers ([
                          $self->master,
                         ]);
@@ -98,7 +98,7 @@ all its daemons.
 
 sub run
 {
-        my ($self) = @_; 
+        my ($self) = @_;
         my ($command) = @ARGV;
         return unless $command && grep /^$command$/, qw(start status restart stop);
         local @ARGV;   # cleaner approach than changing @ARGV

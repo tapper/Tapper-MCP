@@ -16,7 +16,7 @@ construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb
 # -----------------------------------------------------------------------------------------------------------------
 
 
-my @modules = ('Tapper::MCP', 
+my @modules = ('Tapper::MCP',
                'Tapper::MCP::Child',
                'Tapper::MCP::Control',
                'Tapper::MCP::Config',

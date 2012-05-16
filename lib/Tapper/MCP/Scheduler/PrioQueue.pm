@@ -4,7 +4,7 @@ package Tapper::MCP::Scheduler::PrioQueue;
 
         use 5.010;
         use Moose;
-        
+
         use Tapper::Model 'model';
         use aliased 'Tapper::Schema::TestrunDB::Result::TestrunScheduling';
 

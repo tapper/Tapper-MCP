@@ -37,13 +37,13 @@ sub message_create
         $message->insert;
         return $message;
 }
-        
-        
+
+
 
 my $timeout_span = 100;
 
 
-my $initial_state =  { 
+my $initial_state =  {
                       'keep_alive'    => {timeout_span => 3, timeout_date => undef },
                       'current_state' => 'started',
                       'install' => {
@@ -95,7 +95,7 @@ my $result = $state->state_details->results();
 is_deeply($result, [{
                      error => 1,
                      msg => "No plugin defined in keep_alive. I deactivate keep-alive for this testrun.",
-                    }], 
+                    }],
           'Missing keepalive plugin detected'
          );
 

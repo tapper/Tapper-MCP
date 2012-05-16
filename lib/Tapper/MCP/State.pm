@@ -832,12 +832,12 @@ sub next_state
                 when ('keep-alive')        { ($error, $timeout_span) = $self->msg_keep_alive($msg)        };
                                 # (TODO) add default
         }
-        
+
         # every message resets the keep-alive timeout
         if (defined($self->state_details->keep_alive_timeout_span)) {
                 $self->state_details->keep_alive_timeout_date( $self->state_details->keep_alive_timeout_span + time() );
         }
-        
+
         return (1);
 }
 
@@ -898,31 +898,4 @@ sub testrun_finished
         shift->state_details->current_state eq 'finished' ? 1 : 0;
 }
 
-
-
 1;
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 BUGS
-
-None.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
- perldoc Tapper
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
