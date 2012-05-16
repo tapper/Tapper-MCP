@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.0.1     2012-05-16
         - *lots* of enhancements in whole automation layer
         - MCP is now a stop/resume-able state engine,
           based on event queues,
