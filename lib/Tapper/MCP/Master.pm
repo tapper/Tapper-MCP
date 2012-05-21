@@ -1,8 +1,10 @@
-use MooseX::Declare;
-
 ## no critic (RequireUseStrict)
-class Tapper::MCP::Master extends Tapper::MCP
-{
+package Tapper::MCP::Master;
+# ABSTRACT: Wait for new testruns and start a new child when needed
+
+        use 5.010;
+        use Moose;
+        use parent "Tapper::MCP";
         use Devel::Backtrace;
         use File::Path;
         use IO::Select;
@@ -12,17 +14,11 @@ class Tapper::MCP::Master extends Tapper::MCP
         use Try::Tiny;
         use UNIVERSAL;
 
-
         use Tapper::Cmd::Testrun;
         use Tapper::MCP::Child;
         use Tapper::MCP::Net;
         use Tapper::MCP::Scheduler::Controller;
         use Tapper::Model 'model';
-
-
-=head1 NAME
-
-Tapper::MCP::Master - Wait for new testruns and start a new child when needed.
 
 =head1 SYNOPSIS
 
@@ -292,7 +288,7 @@ Inform the notification framework that an event occured in MCP.
                 } catch {
                         $self->log->error("Unable notify user of event $event: $_");
                 };
-                
+
                 return;
         }
 
@@ -488,32 +484,5 @@ Set up all needed data structures then wait for new tests.
                 }
 
         }
-}
-
 
 1;
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 BUGS
-
-None.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
- perldoc Tapper
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-

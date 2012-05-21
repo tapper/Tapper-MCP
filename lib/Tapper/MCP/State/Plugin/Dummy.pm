@@ -63,11 +63,11 @@ sub keep_alive
         } else {
                 $options = $self->cfg->{mcp_callback_handler}{options}{reset_options};
         }
-        
+
         $resetter->reset_host($self->cfg->{hostname}, $options);
         $self->cfg->{reset_remain}--;
         return (0, $self->cfg->{keep_alive}{timeout_receive});
-        
+
 }
 
 1;

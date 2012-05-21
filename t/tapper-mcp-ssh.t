@@ -54,7 +54,7 @@ $child->start_testrun('nosuchhost', $retval);
 my $mcp_host    = $default_config->{mcp_host};
 my $prc_program = $default_config->{files}{tapper_prc};
 
-is_deeply(shift @commands, 
+is_deeply(shift @commands,
           {
            'put' => [ '/data/tapper/live/repository/packages/tapperutils/opt-tapper64.tar.gz',
                       '/dev/shm/tmp/tapper-clientpkg.tgz'] },
@@ -67,5 +67,5 @@ is_deeply(shift @commands,
           {
            'ssh' => ["nosuchhost","$prc_program --host $mcp_host"]},
           'Start PRC in autoinstall mode');
-          
+
 done_testing();

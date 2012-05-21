@@ -28,7 +28,7 @@ my $config = $producer->create_config();     # expects a port number
 my $testrun = model('TestrunDB')->resultset('Testrun')->find(9);
 my @preconditions = $testrun->ordered_preconditions;
 
-is_deeply ($preconditions[0]->precondition_as_hash, 
+is_deeply ($preconditions[0]->precondition_as_hash,
            {
             'guests' => [
                          {
@@ -61,7 +61,7 @@ is_deeply ($preconditions[0]->precondition_as_hash,
                                   'precondition_type' => 'no_option'
                                  }
                       }
-           }, 
+           },
            'All producers in virt precondition substituted');
 
 

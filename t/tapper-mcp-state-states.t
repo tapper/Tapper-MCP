@@ -54,7 +54,7 @@ sub initial_state
                                      'results' => [],
                                      'current_state' => 'preload',
                                      # not evaluated, just needed to know the number of testprograms
-                                     'timeout_testprograms_span' => [ 5, 5 ], 
+                                     'timeout_testprograms_span' => [ 5, 5 ],
                                     },
                                    ],
                                      'results' => []
@@ -91,7 +91,7 @@ is_deeply($state->state_details->state_details->{results},
             'error' => 0
            }
           ], 'MCP results');
-          
+
 
 
 

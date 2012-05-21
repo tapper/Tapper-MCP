@@ -227,7 +227,7 @@ since it would make it to complex.
 sub reboot_system
 {
         my ($self, $host, $hard) = @_;
-	$self->log->debug("Trying to reboot $host.");
+        $self->log->debug("Trying to reboot $host.");
 
 
         my $reset_plugin         = $self->cfg->{reset_plugin};
@@ -271,13 +271,13 @@ sub write_grub_file
         return "No grub text given" unless $text;
 
         my $grub_file    = $self->cfg->{paths}{grubpath}."/$system.lst";
-	$self->log->debug("writing grub file $grub_file");
+        $self->log->debug("writing grub file $grub_file");
 
-	# create the initial grub file for installation of the test system,
-	open (my $GRUBFILE, ">", $grub_file) or return "Can open ".$self->cfg->{paths}{grubpath}."/$system.lst for writing: $!";
-	print $GRUBFILE $text;
-	close $GRUBFILE or return "Can't save grub file for $system:$!";
-	return(0);
+        # create the initial grub file for installation of the test system,
+        open (my $GRUBFILE, ">", $grub_file) or return "Can open ".$self->cfg->{paths}{grubpath}."/$system.lst for writing: $!";
+        print $GRUBFILE $text;
+        close $GRUBFILE or return "Can't save grub file for $system:$!";
+        return(0);
 }
 
 

@@ -1,4 +1,6 @@
-#! perl
+#! /usr/bin/perl
+# PODNAME: tapper-mcp-daemonize
+# ABSTRACT: cmdline frontend to Tapper::MCP::Master/daemonize
 
 use strict;
 use warnings;

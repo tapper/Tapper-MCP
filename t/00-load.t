@@ -10,7 +10,7 @@ use MRO::Compat;
 
 use Test::More;
 
-my @modules = ('Tapper::MCP', 
+my @modules = ('Tapper::MCP',
                'Tapper::MCP::Child',
                'Tapper::MCP::Control',
                'Tapper::MCP::Config',
@@ -31,5 +31,3 @@ plan tests => $#modules+1;
 foreach my $module(@modules) {
         require_ok($module);
 }
-
-diag( "Testing Tapper::MCP $Tapper::MCP::VERSION,Perl $], $^X" );

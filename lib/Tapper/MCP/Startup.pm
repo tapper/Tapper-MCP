@@ -1,19 +1,15 @@
 package Tapper::MCP::Startup;
+# ABSTRACT: the central "Master Control Program" starter
+
+use 5.010;
 
 use strict;
 use warnings;
 
 use Tapper::MCP::Master;
-
 use Moose;
 
-
 no strict 'refs'; ## no critic (ProhibitNoStrict)
-
-
-=head1 NAME
-
-Tapper::MCP - the central "Master Control Program"
 
 =head1 SYNOPSIS
 
@@ -85,7 +81,7 @@ Registers all handled daemons in an array.
 
 sub set_servers
 {
-        my ($self) = @_; 
+        my ($self) = @_;
         $self->servers ([
                          $self->master,
                         ]);
@@ -102,7 +98,7 @@ all its daemons.
 
 sub run
 {
-        my ($self) = @_; 
+        my ($self) = @_;
         my ($command) = @ARGV;
         return unless $command && grep /^$command$/, qw(start status restart stop);
         local @ARGV;   # cleaner approach than changing @ARGV
@@ -110,28 +106,3 @@ sub run
 }
 
 1;
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 BUGS
-
-None.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
- perldoc Tapper
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
