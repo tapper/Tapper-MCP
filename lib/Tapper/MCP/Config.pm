@@ -59,6 +59,7 @@ sub parse_simnow_preconditions
 {
         my ($self, $config, $precondition) = @_;
         $self->mcp_info->test_type('simnow');
+        $config->{log_to_file} = 1;
         return $config;
 }
 
@@ -76,6 +77,7 @@ Parse a hint precondition.
 sub parse_hint_preconditions
 {
         my ($self, $config, $precondition) = @_;
+        $config->{log_to_file} = 1;
         if ($precondition->{simnow}) {
                 $self->mcp_info->test_type('simnow');
                 $config->{paths}{base_dir}='/';
