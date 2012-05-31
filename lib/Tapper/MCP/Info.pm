@@ -102,11 +102,12 @@ sub add_testprogram
 {
 
         my ($self, $prc_number, $program) = @_;
+        my $grace_period = 60 + 60; # (time between SIGTERM and SIGKILL in PRC) + (grace period for sending the message)
         return "prc_number not given to add_testprogram" if not defined $prc_number;
         $program->{timeout} = $program->{timeout_testprogram} || $program->{timeout} || 0;
         delete $program->{precondition_type};
         push(@{$self->mcp_info->{prc}->[$prc_number]->{programs}}, $program);
-        push(@{$self->mcp_info->{prc}->[$prc_number]->{timeouts}->{programs}}, $program->{timeout});
+        push(@{$self->mcp_info->{prc}->[$prc_number]->{timeouts}->{programs}}, $program->{timeout} + $grace_period);
         return 0;
 }
 
