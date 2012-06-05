@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - log files during test
 
 4.0.1     2012-05-16
         - *lots* of enhancements in whole automation layer
