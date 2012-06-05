@@ -19,6 +19,7 @@ use Devel::Backtrace;
 
 use constant BUFLEN     => 1024;
 use constant ONE_MINUTE => 60;
+use constant HARNESS_ACTIVE => 0;#$ENV{HARNESS_ACTIVE};
 
 extends 'Tapper::MCP::Control';
 with 'Tapper::MCP::Net::TAP';
@@ -56,7 +57,7 @@ sub get_messages
         while () {
                 $messages = $self->testrun->message;
                 last if ($messages and $messages->count) or time() > $end_time;
-                sleep 1;
+                sleep 1 unless HARNESS_ACTIVE;
         }
         return $messages;
 }
