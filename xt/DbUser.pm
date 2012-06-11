@@ -6,6 +6,8 @@ use warnings;
 
 use parent 'DBIx::Class';
 
+use lib "xt/";
+
 __PACKAGE__->load_components("Core");
 __PACKAGE__->table("dbuser");
 __PACKAGE__->add_columns
