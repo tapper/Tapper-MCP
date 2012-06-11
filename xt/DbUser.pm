@@ -1,4 +1,5 @@
-package DbUser;
+package # hide from PAUSE indexer
+ DbUser;
 
 use strict;
 use warnings;
