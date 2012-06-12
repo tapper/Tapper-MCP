@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - help with Crypt::DH deps via AAAA::Crypt::DH
 
 4.0.3     2012-06-11
         - hide test modules from PAUSE
