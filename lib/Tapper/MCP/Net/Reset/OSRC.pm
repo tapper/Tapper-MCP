@@ -137,7 +137,7 @@ sub reset_host
                 ($error, $retval) = $self->log_and_exec($cmd);
         }
         undef $tmplog;
-        undef $tmpdir;
+        rmdir $tmpdir;
         return ($error, $retval);
 }
 
