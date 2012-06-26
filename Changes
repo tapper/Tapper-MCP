@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.0.5     2012-06-26
         - rework tmp/log/pid file handling in daemon and reset plugin
 
 4.0.4     2012-06-12
