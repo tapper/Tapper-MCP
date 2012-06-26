@@ -24,7 +24,6 @@ if ($ENV{HARNESS_ACTIVE}) {
         ($tmpfh, $tmpfile) = tempfile("tapper-mcp-daemon.log-XXXXX", DIR => $tmpdir, UNLINK => 1);
         $pidfile = "$tmpdir/tapper-mcp-daemon.pid";
         $logfile = $tmpfile;
-        
 } else {
         $pidfile = tmpdir."/tapper-mcp-daemon.pid";
         $logfile = "/var/log/tapper-mcp-daemon.log";
