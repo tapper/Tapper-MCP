@@ -64,7 +64,7 @@ __END__
 
 =head1 SYNOPSIS
 
-Implements a test for weighted fair queueing scheduling algorithm.
+Implements weighted fair queueing scheduling algorithm.
 
 =head1 FUNCTIONS
 
