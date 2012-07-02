@@ -12,11 +12,11 @@ use Log::Log4perl;
 use Test::Fixture::DBIC::Schema;
 use Tapper::Schema::TestTools;
 use YAML;
-
-# -----------------------------------------------------------------------------------------------------------------
-construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/scenario_testruns.yml' );
-# -----------------------------------------------------------------------------------------------------------------
-
+BEGIN{
+        # -----------------------------------------------------------------------------------------------------------------
+        construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/scenario_testruns.yml' );
+        # -----------------------------------------------------------------------------------------------------------------
+}
 
 use aliased 'Tapper::MCP::Scheduler::Algorithm';
 use aliased 'Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm';
