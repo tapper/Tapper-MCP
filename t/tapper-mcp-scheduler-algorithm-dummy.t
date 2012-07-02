@@ -20,8 +20,8 @@ my $B = Tapper::MCP::Scheduler::Queue->new(id => 2, name => 'B');
 my $C = Tapper::MCP::Scheduler::Queue->new(id => 3, name => 'C');
 
 push @order, $algorithm->get_next_queue({a => $A, b => $B, c => $C});
-push @order, $algorithm->get_next_queue({b => $B, c => $C});
-push @order, $algorithm->get_next_queue({c => $C});
+push @order, $algorithm->get_next_queue({a => $A, b => $B, c => $C});
+push @order, $algorithm->get_next_queue({a => $A, b => $B, c => $C});
 push @order, $algorithm->get_next_queue({a => $A, b => $B, c => $C});
 push @order, $algorithm->get_next_queue({b => $B, c => $C});
 push @order, $algorithm->get_next_queue({c => $C});
