@@ -7,10 +7,6 @@ use warnings;
 use Class::C3;
 use MRO::Compat;
 
-use aliased 'Tapper::MCP::Scheduler::Controller';
-use aliased 'Tapper::MCP::Scheduler::Algorithm';
-use aliased 'Tapper::MCP::Scheduler::Algorithm::WFQ';
-
 use Tapper::Model 'model';
 
 use Data::Dumper;
@@ -31,11 +27,18 @@ use Devel::Backtrace;
 
                         exit -1;
                 };
+BEGIN{
+        # --------------------------------------------------------------------------------
+        construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testrun_with_scheduling_long.yml' );
+        # --------------------------------------------------------------------------------
+}
 
 
-# --------------------------------------------------------------------------------
-construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testrun_with_scheduling_long.yml' );
-# --------------------------------------------------------------------------------
+use aliased 'Tapper::MCP::Scheduler::Controller';
+use aliased 'Tapper::MCP::Scheduler::Algorithm';
+use aliased 'Tapper::MCP::Scheduler::Algorithm::WFQ';
+
+
 model('TestrunDB')->resultset('QueueHost')->new({host_id  => 2, queue_id => 2 })->insert; # addqueue bullock:KVM
 model('TestrunDB')->resultset('QueueHost')->new({host_id  => 5, queue_id => 1 })->insert; # addqueue bascha:Xen
 # --------------------------------------------------
