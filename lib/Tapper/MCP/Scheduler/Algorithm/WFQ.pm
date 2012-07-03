@@ -2,6 +2,7 @@
 package Tapper::MCP::Scheduler::Algorithm::WFQ;
 # ABSTRACT: Scheduling algorithm "Weighted Fair Queueing"
 
+        use UNIVERSAL 'can';
         use Moose::Role;
         use 5.010;
 
@@ -54,8 +55,10 @@ package Tapper::MCP::Scheduler::Algorithm::WFQ;
 
         sub update_queue {
                 my ($self, $q) = @_;
-
                 $q->runcount ( $q->runcount + 1 );
+                if ($q->can('update')) {
+                        $q->update;
+                }
         }
 
 1;
