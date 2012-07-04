@@ -13,7 +13,6 @@ use Tapper::MCP::Scheduler::ObjectBuilder;
 
 
 has hostlist  => (is => 'rw', isa => 'ArrayRef');
-has prioqueue => (is => 'rw', isa => PrioQueue, default => sub { PrioQueue->new });
 has algorithm => (is => 'rw',
                   isa => 'Tapper::MCP::Scheduler::Algorithm',
                   default => sub {
@@ -135,7 +134,9 @@ sub get_next_job {
 
                 my $white_bandwith=1; # chosen queue was first choice
 
-                $job = $self->prioqueue->get_first_fitting($free_hosts);
+                # reset the list of associated jobs with this queue on every get_next_job
+                my $prioqueue = PrioQueue->new();
+                $job = $prioqueue->get_first_fitting($free_hosts);
 
 
         QUEUE:
@@ -152,7 +153,7 @@ sub get_next_job {
                                         foreach my $element ($job->testrun->scenario_element->peer_elements) {
                                                 my $peer_job = $element->testrun->testrun_scheduling;
                                                 next ELEMENT if $peer_job->id == $job->id;
-                                                $self->prioqueue->add($peer_job);
+                                                $prioqueue->add($peer_job);
                                         }
                                 }
                                 $self->algorithm->update_queue($job->queue) if $white_bandwith;
