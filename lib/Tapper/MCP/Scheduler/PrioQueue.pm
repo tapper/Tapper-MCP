@@ -59,7 +59,7 @@ sub get_first_fitting {
                 if (my $host = $job->fits($free_hosts)) {
                         my $db_job = model('TestrunDB')->resultset('TestrunScheduling')->find($job->{id});
                         $db_job->host_id ($host->id);
-
+                        $db_job->update;
                         if ($db_job->testrun->scenario_element) {
                                 $db_job->testrun->scenario_element->is_fitted(1);
                                 $db_job->testrun->scenario_element->update();
