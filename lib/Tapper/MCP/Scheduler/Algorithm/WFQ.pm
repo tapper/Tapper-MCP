@@ -2,7 +2,6 @@
 package Tapper::MCP::Scheduler::Algorithm::WFQ;
 # ABSTRACT: Scheduling algorithm "Weighted Fair Queueing"
 
-        use UNIVERSAL 'can';
         use Moose::Role;
         use 5.010;
 
