@@ -13,6 +13,7 @@ package Tapper::MCP::Master;
         use POSIX ":sys_wait_h";
         use Try::Tiny;
         use UNIVERSAL;
+        use constant HARNESS_ACTIVE => $ENV{HARNESS_ACTIVE};
 
         use Tapper::Cmd::Testrun;
         use Tapper::MCP::Child;
@@ -416,7 +417,7 @@ itself is put outside of function to allow testing.
                                         # children being started close
                                         # to each other and trying to
                                         # reset simulataneously
-                                        sleep 2;
+                                        sleep 2 unless HARNESS_ACTIVE;
                                         $self->run_due_tests($job);
                                 }
                                 $lastrun = time();

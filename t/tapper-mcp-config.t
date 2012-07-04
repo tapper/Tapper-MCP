@@ -56,7 +56,7 @@ cmp_deeply($config->{preconditions},
                                                          {
                                                          'runtime' => '5',
                                                          'program' => '/home/tapper/x86_64/bin/tapper_testsuite_kernbench.sh',
-                                                         'timeout' => 36000, 
+                                                         'timeout' => 36000,
                                                          },
                                                         ],
                                     'total_guests' => 1,

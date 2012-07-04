@@ -3,7 +3,7 @@ package Tapper::MCP::Net::Reset::OSRC;
 use strict;
 use warnings;
 
-use File::Temp;
+use File::Temp qw"tempfile tempdir";
 use File::Spec;
 use Net::OpenSSH;
 use Moose;
@@ -105,10 +105,9 @@ sub reset_host
                 $self->log->warn("TFTP log '$log' is zero size!");
         }
 
-        my $logbefore =
-         File::Temp
-                  ->new(TEMPLATE => "osrcreset-tftplog-before-XXXXXX", DIR => File::Spec->tmpdir)
-                   ->filename;
+        my $tmpdir = tempdir( CLEANUP => 1 );
+        my $tmplog = File::Temp->new(TEMPLATE => "osrcreset-tftplog-before-XXXXXX", DIR => $tmpdir, UNLINK => 1);
+        my $logbefore = $tmplog->filename;
 
         # store tftp log before reboot
         $self->log_and_exec("cp $log $logbefore");
@@ -137,6 +136,8 @@ sub reset_host
 
                 ($error, $retval) = $self->log_and_exec($cmd);
         }
+        undef $tmplog;
+        rmdir $tmpdir;
         return ($error, $retval);
 }
 

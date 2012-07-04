@@ -56,7 +56,7 @@ sub get_messages
         while () {
                 $messages = $self->testrun->message;
                 last if ($messages and $messages->count) or time() > $end_time;
-                sleep 1;
+                sleep 1 unless $ENV{HARNESS_ACTIVE};
         }
         return $messages;
 }
