@@ -1,9 +1,12 @@
 use Test::Deep;
 use Test::More tests => 2;
 use Data::Dumper;
+use Tapper::Schema::TestTools;
+
 use aliased 'Tapper::MCP::Scheduler::Algorithm';
 use aliased 'Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm';
 use Tapper::MCP::Scheduler::Queue;
+
 
 my $algorithm = Algorithm->new_with_traits
     (
