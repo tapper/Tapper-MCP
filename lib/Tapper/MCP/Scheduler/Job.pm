@@ -5,7 +5,7 @@ use warnings;
 
 use Moose;
 use Safe;
-use Tapper::Model 'model';
+use Tapper::Model;
 use Tapper::MCP::Scheduler::ObjectBuilder;
 
 
@@ -23,7 +23,7 @@ has testrun       => (is => 'ro',
                       lazy => 1,
                       default => sub {
                               my $self = shift;
-                              return model('TestrunDB')->resultset('Testrun')->search({id => $self->testrun_id})->first;
+                              return Tapper::Model::model('TestrunDB')->resultset('Testrun')->search({id => $self->testrun_id})->first;
                       });
 
 has requested_features => (is => "ro",
@@ -31,7 +31,7 @@ has requested_features => (is => "ro",
                            default => sub {
                                    my ($self) = shift;
                                    my @return_feat;
-                                   my $feats = model('TestrunDB')->resultset('TestrunRequestedFeature')->search({testrun_id => $self->testrun_id});
+                                   my $feats = Tapper::Model::model('TestrunDB')->resultset('TestrunRequestedFeature')->search({testrun_id => $self->testrun_id});
                                    $feats->result_class('DBIx::Class::ResultClass::HashRefInflator');
                                    while (my $this_feat = $feats->next) {
                                            push @return_feat, $this_feat;
@@ -43,10 +43,10 @@ has requested_hosts => (is => "ro",
                         default => sub {
                                 my ($self) = shift;
                                 my @return_hosts;
-                                my $hosts = model('TestrunDB')->resultset('TestrunRequestedHost')->search({testrun_id => $self->testrun_id});
+                                my $hosts = Tapper::Model::model('TestrunDB')->resultset('TestrunRequestedHost')->search({testrun_id => $self->testrun_id});
                                 my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
                                 while (my $this_host = $hosts->next) {
-                                        my $host_rs =  model->resultset('Host')->search({id => $this_host->host->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
+                                        my $host_rs =  Tapper::Model::model->resultset('Host')->search({id => $this_host->host->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
                                         push @return_hosts, $obj_builder->new_host(%{$host_rs->first});
                                 }
                                 return \@return_hosts;
@@ -56,12 +56,12 @@ has queues         => (is => 'ro',
                        default => sub {
                                my ($self) = shift;
                                my @return_hosts;
-                               my $queue_hosts = model('TestrunDB')->resultset('QueueHost')->search({queue_id => $self->id});
+                               my $queue_hosts = Tapper::Model::model('TestrunDB')->resultset('QueueHost')->search({queue_id => $self->id});
                                my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
 
 
                                while (my $this_qh = $queue_hosts->next) {
-                                       my $queue = model->resultset('Queue')->search({id => $this_qh->queue->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
+                                       my $queue = Tapper::Model::model->resultset('Queue')->search({id => $this_qh->queue->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
                                        push @return_hosts, $obj_builder->new_queue(%{$queue->first});
                                }
                                return \@return_hosts;
@@ -106,7 +106,7 @@ sub hostname (;$) ## no critic (ProhibitSubroutinePrototypes)
 
 our @functions;
 BEGIN {
-        my $features = model->resultset('HostFeature')->search(
+        my $features = Tapper::Model::model->resultset('HostFeature')->search(
                                                                {
                                                                },
                                                                {
