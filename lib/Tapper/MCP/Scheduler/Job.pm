@@ -92,17 +92,6 @@ sub match_host {
         return;
 }
 
-sub hostname (;$) ## no critic (ProhibitSubroutinePrototypes)
-{
-        my ($given) = @_;
-
-        if ($given) {
-                # available
-                return $given ~~ $_->{features}->{hostname};
-        } else {
-                return $_->{features}->{hostname};
-        }
-}
 
 our @functions;
 BEGIN {
