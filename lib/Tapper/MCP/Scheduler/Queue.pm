@@ -7,6 +7,7 @@ use Moose;
 use MooseX::ClassAttribute;
 use Tapper::Model 'model';
 use Tapper::MCP::Scheduler::ObjectBuilder;
+use Scalar::Util qw/weaken/;
 
 
 has id                 => (is => 'ro');
@@ -29,6 +30,7 @@ has testrunschedulings => (is => 'ro',
                                    while (my $this_job = $jobs->next) {
                                            $this_job->{queue} = $self;
                                            push @return_jobs, $obj_builder->new_job(%{$this_job});
+                                           weaken $return_jobs[$#return_jobs];
                                    }
                                    return \@return_jobs;
                            });
@@ -44,6 +46,8 @@ has queuehosts         => (is => 'ro',
                                    while (my $this_qh = $queue_hosts->next) {
                                            my $hosts = model->resultset('Host')->search({id => $this_qh->host->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
                                            push @return_hosts, $obj_builder->new_host(%{$hosts->first});
+                                           weaken $return_hosts[$#return_hosts];
+
                                    }
                                    return \@return_hosts;
                            });
