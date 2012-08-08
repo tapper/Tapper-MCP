@@ -96,13 +96,13 @@ sub match_host {
 our @functions;
 BEGIN {
         my $features = Tapper::Model::model->resultset('HostFeature')->search(
-                                                               {
-                                                               },
-                                                               {
-                                                                columns => [ qw/entry/ ],
-                                                                distinct => 1,
-                                                               });
-        @functions = ('&hostname');
+                                                                              {
+                                                                              },
+                                                                              {
+                                                                               columns => [ qw/entry/ ],
+                                                                               distinct => 1,
+                                                                              });
+        @functions;
         while ( my $feature = $features->next ) {
                 my $entry = $feature->entry;
                 push @functions, "&".$entry;
@@ -116,7 +116,22 @@ BEGIN {
                             } else {
                                     return \$_->{features}->{$entry} };
                     }";
-                eval $eval_string;                ## no critic
+                eval $eval_string; ## no critic
+        }
+        if ( not grep {$_ ~~ /hostname/} @functions ) {
+                eval '
+                sub hostname (;$) ## no critic (ProhibitSubroutinePrototypes)
+                              {
+                                      my ($given) = @_;
+
+                                      if ($given) {
+                                              # available
+                                              return $given ~~ $_->{features}->{hostname};
+                                      } else {
+                                              return $_->{features}->{hostname};
+                                      }
+                              }';
+                push @functions, "&hostname";
         }
 }
 
