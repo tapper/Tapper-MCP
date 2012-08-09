@@ -694,6 +694,9 @@ sub parse_precondition
                 when( 'installer_stop') {
                         $config->{installer_stop} = 1;
                 }
+                when( 'testrun_stop') {
+                        $config->{testrun_stop} = 1;
+                }
                 when( 'reboot') {
                         $config = $self->parse_reboot($config, $precondition);
                 }
