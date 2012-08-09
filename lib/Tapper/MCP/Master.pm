@@ -333,7 +333,7 @@ Run the tests that are due.
                         };
                         $retval = $@ if $@;
 
-                        $self->notify_event('testrun_finished', {testrun_id => 42});
+                        $self->notify_event('testrun_finished', {testrun_id => $id});
 
                         if ( ($retval or $child->rerun) and $job->testrun->rerun_on_error) {
                                 my $cmd  = Tapper::Cmd::Testrun->new();
