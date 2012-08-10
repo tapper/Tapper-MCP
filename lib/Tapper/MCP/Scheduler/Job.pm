@@ -102,7 +102,7 @@ BEGIN {
                                                                                columns => [ qw/entry/ ],
                                                                                distinct => 1,
                                                                               });
-        @functions;
+
         while ( my $feature = $features->next ) {
                 my $entry = $feature->entry;
                 push @functions, "&".$entry;

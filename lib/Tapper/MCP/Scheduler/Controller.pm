@@ -56,7 +56,7 @@ Create a list of all active queues with their associated testruns.
 
 sub official_queuelist
 {
-	      
+
         my $queue_rs = model('TestrunDB')->resultset('Queue')->search({active=> 1}
                                                                       ,{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
         my %queues;
@@ -70,7 +70,6 @@ sub official_queuelist
                 $queue_objects{$name} = $obj_builder->new_queue(%{$queues{$name}});
         }
         return \%queue_objects;
-        
 }
 
 
@@ -86,7 +85,7 @@ Check whether we need to change from scheduling white bandwidth to black bandwid
 
 sub toggle_bandwith_color {
         my ($self, $free_hosts, $queue) = @_;
-        
+
         return 0 if @{$queue->jobs} == 0;
         foreach my $free_host ( map {$_->{host} } @$free_hosts) {
                 if (@{$free_host->queues}) {
@@ -141,7 +140,7 @@ sub get_next_job {
 
         QUEUE:
                 while (not $job) {
-                        
+
                         my $queue = $self->algorithm->lookup_next_queue($queues);
                         return () unless $queue;
                         if ($job = $queue->get_first_fitting($free_hosts)) {

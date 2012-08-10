@@ -1,7 +1,7 @@
 ---
-# -------------------- users
+# -------------------- owners
 
-- schema: User
+- schema: Owner
   name: sschwigo
   data:
     id: 12
@@ -37,7 +37,7 @@
   name: aaa-xen
   data:
     id: 1001
-    owner_user_id: 12
+    owner_id: 12
     shortname: aaa-xen
     notes: aaa
     topic_name: Distribution

@@ -9,7 +9,7 @@ use Tapper::Model 'model';
 use aliased 'Tapper::Schema::TestrunDB::Result::TestrunScheduling';
 
 
-has testrunschedulings => (is => 'ro', 
+has testrunschedulings => (is => 'ro',
                            lazy => 1,
                            default => sub {
                                    my ($self) = shift;
@@ -17,7 +17,7 @@ has testrunschedulings => (is => 'ro',
                                    my $jobs = model('TestrunDB')->resultset('TestrunScheduling')->search({prioqueue_seq => { '>', 0}, status => 'schedule'}, {order_by => 'prioqueue_seq'});
                                    $jobs->result_class('DBIx::Class::ResultClass::HashRefInflator');
                                    my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
-                                   
+
                                    while (my $this_job = $jobs->next) {
                                            $this_job->{queue} = $self;
                                            push @return_jobs, $obj_builder->new_job(%{$this_job});
@@ -64,7 +64,7 @@ sub get_first_fitting {
                                 $db_job->testrun->scenario_element->is_fitted(1);
                                 $db_job->testrun->scenario_element->update();
                         }
-                        
+
                         return $db_job;
                 }
         }
@@ -73,7 +73,7 @@ sub get_first_fitting {
 
 1;
 
- __END__
+__END__
 
 =head1 SYNOPSIS
 
@@ -97,4 +97,3 @@ Call the producer method associated with this object.
 
 @return success - test run id
 @return error   - exception
-

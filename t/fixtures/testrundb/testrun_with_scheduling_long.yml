@@ -1,8 +1,8 @@
 ---
 
-# -------------------- users
+# -------------------- owners
 
-- schema: User
+- schema: Owner
   name: sschwigo
   data:
     id: 12
@@ -141,7 +141,7 @@
 - schema: Testrun
   name: aaa
   data:
-    owner_user_id: 12
+    owner_id: 12
     shortname: Test-aaa-Xen
     notes: 
     topic_name: Software
@@ -163,7 +163,7 @@
 - schema: Testrun
   name: bbb
   data:
-    owner_user_id: 12
+    owner_id: 12
     shortname: Test-bbb-kvm
     notes: 
     topic_name: Software
@@ -183,7 +183,7 @@
 - schema: Testrun
   name: ccc-kernel
   data:
-    owner_user_id: 12
+    owner_id: 12
     shortname: Test-ccc-kernel
     notes: ccc
     topic_name: Distribution
