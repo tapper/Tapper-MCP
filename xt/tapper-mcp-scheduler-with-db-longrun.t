@@ -93,9 +93,9 @@ print $@ if $@;
 print STDERR "\n# ".Dumper \%jobs;
 print STDERR "# ".join(", ", @jobqueue);
 
-is($jobs{Kernel}, 18,'Kernel queue bandwith');
-is($jobs{KVM}, 59,'KVM queue bandwith');
-is($jobs{Xen}, 70, 'Xen queue bandwith');
+is($jobs{Kernel}, 24,'Kernel queue bandwith');
+is($jobs{KVM}, 49,'KVM queue bandwith');
+is($jobs{Xen}, 74, 'Xen queue bandwith');
 is($jobs{none}, 33, 'Always jobs');
 
 ok(1, 'Dummy');
