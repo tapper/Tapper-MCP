@@ -404,6 +404,7 @@ sub parse_testprogram
 {
         my ($self, $config, $testprogram, $prc_number) = @_;
         $prc_number //= 0;
+        $prc_number = $testprogram->{prc} if $testprogram->{prc}; # allow overriding PRC number for nesting
 
         if (not $testprogram->{timeout}) {
                 $testprogram->{timeout} = $testprogram->{timeout_testprogram};
@@ -418,6 +419,12 @@ sub parse_testprogram
         $testprogram->{timeout} = ($self->cfg->{times}{default_testprogram_timeout} // 600) unless defined $testprogram->{timeout};
         no warnings 'uninitialized';
         push @{$config->{prcs}->[$prc_number]->{config}->{testprogram_list}}, $testprogram;
+
+        $config->{prcs}->[$prc_number]->{mountfile} = $testprogram->{mountfile}
+          if $testprogram->{mountfile} and not $config->{prcs}->[$prc_number]->{mountfile};
+        $config->{prcs}->[$prc_number]->{mountpartition} = $testprogram->{mountpartition}
+          if $testprogram->{mountpartition} and not $config->{prcs}->[$prc_number]->{mountpartition};
+
         $self->mcp_info->add_testprogram($prc_number, $testprogram);
         use warnings;
         return $config;
@@ -694,6 +701,9 @@ sub parse_precondition
                 when( 'installer_stop') {
                         $config->{installer_stop} = 1;
                 }
+                when( 'testrun_stop') {
+                        $config->{testrun_stop} = 1;
+                }
                 when( 'reboot') {
                         $config = $self->parse_reboot($config, $precondition);
                 }
@@ -798,8 +808,10 @@ sub get_install_config
         # generate installer config
         $config = $self->update_installer_grub($config);
 
+        my $current_prc_number = 0;
         while (my $prc_precondition = shift(@{$config->{prcs}})){
                 $prc_precondition->{precondition_type} = "prc";
+                $prc_precondition->{config}->{guest_number} = $current_prc_number++;
                 push(@{$config->{preconditions}}, $prc_precondition);
         }
 

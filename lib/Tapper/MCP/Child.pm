@@ -282,8 +282,15 @@ sub runtest_handling
 
         my $config = $self->generate_configs($hostname);
         return $self->handle_error("Generating configs", $config) if ref $config ne 'HASH';
-        $self->log->debug("Reviving testrun ",$self->testrun->id) if $revive;
 
+        if ($config->{testrun_stop}) {
+                my $host = model('TestrunDB')->resultset('Host')->search({name => $hostname});
+                $host->active(0);
+                $host->comment($host->comment."(deactivated by testrun".$self->testrun->id.")");
+                $host->update;
+        }
+
+        $self->log->debug("Reviving testrun ",$self->testrun->id) if $revive;
         $self->state(Tapper::MCP::State->new(testrun_id => $self->testrun->id, cfg => $config));
         $self->state->state_init($self->mcp_info->get_state_config, $revive );
 
