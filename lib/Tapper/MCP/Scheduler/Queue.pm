@@ -72,6 +72,7 @@ sub get_first_fitting
                                 $db_job->testrun->scenario_element->is_fitted(1);
                                 $db_job->testrun->scenario_element->update();
                         }
+                        $db_job->update;
                         return $db_job;
                 }
         }
