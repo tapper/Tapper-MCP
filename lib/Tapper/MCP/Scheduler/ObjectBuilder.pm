@@ -43,6 +43,7 @@ sub new_queue
 {
         my ($self, %values) = @_;
         if (not $values{id}) {
+                # XXX debug code for param testing. Please improve
                 use Devel::Backtrace;
                 my $backtrace = Devel::Backtrace->new(-start=>2, -format => '%I. %s');
                 print STDERR $backtrace;
