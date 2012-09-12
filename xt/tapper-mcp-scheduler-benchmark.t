@@ -15,15 +15,14 @@ use Data::Dumper;
 use Test::Fixture::DBIC::Schema;
 use Tapper::Producer::Temare;
 
-use Test::MemoryGrowth;
 use Test::More 0.88;
 use Test::MockModule;
 
-# use Tapper::Schema::TestTools;
-# # BEGIN{
-# #         # --------------------------------------------------------------------------------
-# #         construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testrun_with_circle.yml' );
-# # }
+use Tapper::Schema::TestTools;
+BEGIN{
+        # --------------------------------------------------------------------------------
+        construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testrun_with_circle.yml' );
+}
 use aliased 'Tapper::MCP::Scheduler::Controller';
 use aliased 'Tapper::MCP::Scheduler::Algorithm';
 use aliased 'Tapper::MCP::Scheduler::Algorithm::WFQ';
@@ -37,10 +36,13 @@ sub schedule_with_fork
         my $pid = open(my $fh, "-|");
         if ($pid == 0) {
                 my $next_job = $scheduler->get_next_job;
+                exit unless $next_job;
                 print $next_job->id;
                 exit;
         } else {
                 my $id = <$fh>;
+                return unless $id;
+                wait;
                 my $next_job = model('TestrunDB')->resultset('TestrunScheduling')->find($id);
                 $scheduler->mark_job_as_finished($next_job);
         }
@@ -53,16 +55,18 @@ sub schedule_no_fork
         $scheduler->mark_job_as_finished($next_job);
 }
 
+my $time = time();
+for my $i (1..20) {
+        schedule_with_fork()
+}
+say STDERR  "No Fork: ",time - $time;
 
-# --------------------------------------------------
+# $time = time();
+# for my $i (1..20) {
+#         schedule_with_fork()
+# }
+# say STDERR "Fork: ",time - $time;
 
-my $mock = new Test::MockModule('Tapper::Schema::TestrunDB::Result::TestrunScheduling');
-$mock->mock('produce_preconditions',sub{return 0;});
-
-my $next_job;
-
-# This takes extremly long indeed. Yet you can not reduce the number of call significantly otherwise the memory leak wont be detected.
-no_growth  { schedule_no_fork } calls => 10, 'get_next_job does not grow memory';
 ok(1, 'Dummy');
 
 done_testing();
