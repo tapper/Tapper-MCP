@@ -85,8 +85,8 @@ sub get_first_fitting
         my @forbidden_host_names;
         @forbidden_host_names = map {$_->name} @{$self->deniedhosts};
 
-        # any does not work correctly on empty arrays
-        my @new_free_hosts = grep(($_->{host}->name ne any('', @forbidden_host_names)), @$free_hosts);
+        # "x ne any(x,y)" is not the same as "not x eq any(x,y)". That migt be confusing, so please keep the "not eq".
+        my @new_free_hosts = grep((not $_->{host}->name eq any(@forbidden_host_names)), @$free_hosts);
         $free_hosts = \@new_free_hosts;
 
 
