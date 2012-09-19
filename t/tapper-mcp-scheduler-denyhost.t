@@ -23,19 +23,19 @@ use Test::More tests => 1;
 use Test::Deep;
 BEGIN {
         # --------------------------------------------------------------------------------
-        construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testrun_with_scheduling_run1.yml' );
+        construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testrun_with_scheduling_deny.yml' );
         # --------------------------------------------------------------------------------
 }
 
 
 use aliased 'Tapper::MCP::Scheduler::Controller';
 use aliased 'Tapper::MCP::Scheduler::Algorithm';
-use aliased 'Tapper::MCP::Scheduler::Algorithm::DummyAlgorithm';
+use aliased 'Tapper::MCP::Scheduler::Algorithm::WFQ';
 use aliased 'Tapper::Producer::DummyProducer';
 
 # --------------------------------------------------
 
-my $algorithm = Algorithm->new_with_traits ( traits => [DummyAlgorithm] );
+my $algorithm = Algorithm->new_with_traits ( traits => [WFQ] );
 my $scheduler = Controller->new (algorithm => $algorithm);
 
 # --------------------------------------------------
