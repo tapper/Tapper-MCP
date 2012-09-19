@@ -8,6 +8,7 @@ use MooseX::ClassAttribute;
 use Tapper::Model 'model';
 use Tapper::MCP::Scheduler::ObjectBuilder;
 use Scalar::Util qw/weaken/;
+use Perl6::Junction qw/any/;
 
 
 has id                 => (is => 'ro');
@@ -51,6 +52,24 @@ has queuehosts         => (is => 'ro',
                                    }
                                    return \@return_hosts;
                            });
+has deniedhosts  => (is => 'ro',
+                         lazy => 1,
+                         default => sub {
+                                   my ($self) = shift;
+                                   my @return_hosts;
+                                   my $queue_hosts = model('TestrunDB')->resultset('DeniedHost')->search({queue_id => $self->id});
+                                   my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
+
+
+                                   while (my $this_qh = $queue_hosts->next) {
+                                           my $hosts = model->resultset('Host')->search({id => $this_qh->host->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
+                                           push @return_hosts, $obj_builder->new_host(%{$hosts->first});
+                                           weaken $return_hosts[$#return_hosts];
+
+                                   }
+                                   return \@return_hosts;
+                           },
+                         );
 
 
 sub jobs
@@ -62,6 +81,15 @@ sub jobs
 sub get_first_fitting
 {
         my ($self, $free_hosts) = @_;
+
+        my @forbidden_host_names;
+        @forbidden_host_names = map {$_->name} @{$self->deniedhosts};
+
+        # any does not work correctly on empty arrays
+        my @new_free_hosts = grep(($_->{host}->name ne any('', @forbidden_host_names)), @$free_hosts);
+        $free_hosts = \@new_free_hosts;
+
+
         foreach my $job (@{$self->testrunschedulings}) {
                 my $host = $job->fits($free_hosts);
                 if ($host) {
