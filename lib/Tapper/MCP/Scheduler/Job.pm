@@ -51,20 +51,15 @@ has requested_hosts => (is => "ro",
                                 }
                                 return \@return_hosts;
                         });
-has queues         => (is => 'ro',
-                       lazy => 1,
-                       default => sub {
-                               my ($self) = shift;
-                               my @return_hosts;
-                               my $queue_hosts = Tapper::Model::model('TestrunDB')->resultset('QueueHost')->search({queue_id => $self->id});
-                               my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
-
-
-                               while (my $this_qh = $queue_hosts->next) {
-                                       my $queue = Tapper::Model::model->resultset('Queue')->search({id => $this_qh->queue->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
-                                       push @return_hosts, $obj_builder->new_queue(%{$queue->first});
-                               }
-                               return \@return_hosts;
+has queue         => (is => 'ro',
+                      lazy => 1,
+                      default => sub {
+                              my ($self) = shift;
+                              my @return_obj;
+                              my $queue_host = Tapper::Model::model('TestrunDB')->resultset('QueueHost')->search({queue_id => $self->id});
+                              my $queue = Tapper::Model::model->resultset('Queue')->search({id => $queue_host->queue->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
+                              my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
+                              return $obj_builder->new_queue(%{$queue->first});
                        });
 
 # ----- scheduler related methods -----
