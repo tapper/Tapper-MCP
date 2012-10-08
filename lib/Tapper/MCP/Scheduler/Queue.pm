@@ -46,7 +46,7 @@ has queuehosts         => (is => 'ro',
 
                                    while (my $this_qh = $queue_hosts->next) {
                                            my $hosts = model->resultset('Host')->search({id => $this_qh->host->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
-                                           push @return_hosts, $obj_builder->new_host(%{$hosts->first});
+                                           push @return_hosts, $obj_builder->new_host(%{$hosts->search({}, {rows => 1})->first});
                                            weaken $return_hosts[$#return_hosts];
 
                                    }
@@ -63,7 +63,7 @@ has deniedhosts  => (is => 'ro',
 
                                    while (my $this_qh = $queue_hosts->next) {
                                            my $hosts = model->resultset('Host')->search({id => $this_qh->host->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
-                                           push @return_hosts, $obj_builder->new_host(%{$hosts->first});
+                                           push @return_hosts, $obj_builder->new_host(%{$hosts->search({}, {rows => 1})->first});
                                            weaken $return_hosts[$#return_hosts];
 
                                    }

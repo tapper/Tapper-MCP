@@ -23,7 +23,7 @@ has testrun       => (is => 'ro',
                       lazy => 1,
                       default => sub {
                               my $self = shift;
-                              return Tapper::Model::model('TestrunDB')->resultset('Testrun')->search({id => $self->testrun_id})->first;
+                              return Tapper::Model::model('TestrunDB')->resultset('Testrun')->search({id => $self->testrun_id}, {rows => 1})->first;
                       });
 
 has requested_features => (is => "ro",
@@ -47,7 +47,7 @@ has requested_hosts => (is => "ro",
                                 my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
                                 while (my $this_host = $hosts->next) {
                                         my $host_rs =  Tapper::Model::model->resultset('Host')->search({id => $this_host->host->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
-                                        push @return_hosts, $obj_builder->new_host(%{$host_rs->first});
+                                        push @return_hosts, $obj_builder->new_host(%{$host_rs->search({}, {rows => 1})->first});
                                 }
                                 return \@return_hosts;
                         });
@@ -59,7 +59,7 @@ has queue         => (is => 'ro',
                               my $queue_host = Tapper::Model::model('TestrunDB')->resultset('QueueHost')->search({queue_id => $self->id});
                               my $queue = Tapper::Model::model->resultset('Queue')->search({id => $queue_host->queue->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
                               my $obj_builder = Tapper::MCP::Scheduler::ObjectBuilder->instance;
-                              return $obj_builder->new_queue(%{$queue->first});
+                              return $obj_builder->new_queue(%{$queue->search({}, {rows => 1})->first});
                        });
 
 # ----- scheduler related methods -----
