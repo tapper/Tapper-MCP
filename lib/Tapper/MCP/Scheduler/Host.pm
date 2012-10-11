@@ -28,7 +28,7 @@ has queues => (is => 'ro',
 
                        while (my $this_queue = $queue_hosts->next) {
                                my $q = model->resultset('Queue')->search({id => $this_queue->queue->id},{result_class => 'DBIx::Class::ResultClass::HashRefInflator'});
-                               push @return_queues, $obj_builder->new_queue(%{$q->first});
+                               push @return_queues, $obj_builder->new_queue(%{$q->search({}, {rows => 1})->first});
                        }
                        return \@return_queues;
                });

@@ -35,7 +35,9 @@ sub _max_seq {
             prioqueue_seq => { '>', 0 } },
            {
             select => [ { max => 'prioqueue_seq' } ],
-            as     => [ 'max_seq' ], }
+            as     => [ 'max_seq' ],
+            rows   => 1,
+           }
           )->first;
         return $job_with_max_seq->get_column('max_seq')
           if $job_with_max_seq and defined $job_with_max_seq->get_column('max_seq');

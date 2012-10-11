@@ -603,7 +603,7 @@ sub parse_produce_precondition
         return $produced_preconditions
           unless ref($produced_preconditions) eq 'ARRAY';
         my $position = model->resultset('TestrunPrecondition')->search({testrun_id => $self->testrun->id,
-                                                                        precondition_id => $precondition->id})->first->succession;
+                                                                        precondition_id => $precondition->id}, {rows => 1})->first->succession;
         $self->testrun->disassign_preconditions($precondition->id);
 
         foreach my $produced_precondition (@$produced_preconditions) {
@@ -906,7 +906,7 @@ sub get_common_config
                 my $path = $config->{paths}{sync_path}."/".$config->{scenario_id}."/";
                 $config->{files}{sync_file} = "$path/syncfile";
 
-                if ($self->testrun->scenario_element->peer_elements->first->testrun->id == $testrun->id) {
+                if ($self->testrun->scenario_element->peer_elements->search({}, {rows => 1})->first->testrun->id == $testrun->id) {
                         if (not -d $path) {
                                 File::Path::mkpath($path, {error => \my $retval});
                         ERROR:
