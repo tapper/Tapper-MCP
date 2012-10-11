@@ -290,7 +290,7 @@ sub runtest_handling
                 $host->update;
         }
 
-        $self->log->debug("Reviving testrun ",$self->testrun->id) if $revive;
+        $self->log->info("Reviving testrun ",$self->testrun->id) if $revive;
         $self->state(Tapper::MCP::State->new(testrun_id => $self->testrun->id, cfg => $config));
         $self->state->state_init($self->mcp_info->get_state_config, $revive );
 
