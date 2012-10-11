@@ -15,6 +15,7 @@ use Sys::Hostname;
 use YAML::Syck qw /Load Dump LoadFile DumpFile/;
 
 use Tapper::Model 'model';
+use Tapper::Cmd::Cobbler;
 use Tapper::Config;
 use Tapper::MCP::Info;
 use Tapper::Producer;
@@ -385,6 +386,43 @@ sub parse_image_precondition
         return $config;
 }
 
+
+=head2 parse_cobbler_preconditions
+
+Handle precondition cobbler. Make sure host exists in cobbler system.
+
+@param hash ref - config to change
+@param hash ref - precondition as hash
+
+@return success - config hash
+@return error   - error string
+
+
+=cut
+
+sub parse_cobbler_preconditions
+{
+        my ($self, $config, $cobbler) = @_;
+        my $cmd = Tapper::Cmd::Cobbler->new();
+        my $host = $self->testrun->testrun_scheduling->host->name;
+        my $error;
+
+
+        # add host if not already known to Cobbler
+        my @hosts = $cmd->host_list({name => $host});
+        if (not @hosts) {
+                # one possible error is a race condition between list and host_new
+                # this should be rare enough to justify the issue for easier development
+                $error = $cmd->host_new({name => $host});
+                return $error if $error;
+        }
+
+        $error  = $cmd->host_update({name => $host, profile => $cobbler->{profile}, "netboot-enabled" => 1});
+        return $error if $error;
+        $config->{cobbler} = $cobbler->{profile};
+        return $config;
+}
+
 =head2 parse_testprogram
 
 Handle precondition testprogram. Make sure testprogram is correctly to config
@@ -721,6 +759,9 @@ sub parse_precondition
                 }
                 when( 'hint' ) {
                         $config=$self->parse_hint_preconditions($config, $precondition);
+                }
+                when( 'cobbler' ) {
+                        $config=$self->parse_cobbler_preconditions($config, $precondition);
                 }
                 default {
                         push @{$config->{preconditions}}, $precondition;
