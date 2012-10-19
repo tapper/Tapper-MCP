@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.1.0     2012-10-19
         * Speedup rework (factor 5)
         - [FEAT] Scheduler with non-DBIC objects
         - [FEAT] scheduler in separate process
