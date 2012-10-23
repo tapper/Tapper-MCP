@@ -409,7 +409,8 @@ sub parse_cobbler_preconditions
 
 
         # add host if not already known to Cobbler
-        my @hosts = $cmd->host_list({name => $host});
+        my @hosts = eval{ $cmd->host_list({name => $host})};
+        return $@ if $@;
         if (not @hosts) {
                 # one possible error is a race condition between list and host_new
                 # this should be rare enough to justify the issue for easier development
