@@ -414,7 +414,7 @@ sub parse_cobbler_preconditions
         if (not @hosts) {
                 # one possible error is a race condition between list and host_new
                 # this should be rare enough to justify the issue for easier development
-                $error = $cmd->host_new({name => $host});
+                $error = $cmd->host_new($host);
                 return $error if $error;
         }
 
