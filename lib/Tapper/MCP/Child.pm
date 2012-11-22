@@ -103,8 +103,8 @@ sub generate_configs
         my ($self, $hostname ) = @_;
         my $retval;
 
-        my $mcpconfig = Tapper::MCP::Config->new($self->testrun);
 
+        my $mcpconfig = Tapper::MCP::Config->new($self->testrun);
         $self->log->debug("Create install config for $hostname");
         my $config   = $mcpconfig->create_config();
         return $config if not ref($config) eq 'HASH';
@@ -114,12 +114,12 @@ sub generate_configs
 
         if ($config->{autoinstall}) {
                 my $common_config = $mcpconfig->get_common_config();
-                $common_config->{hostname} = $hostname;  # allows guest systems to know their host system name
+                $common_config->{hostname} = $hostname; # allows guest systems to know their host system name
 
                 my $testconfigs = $mcpconfig->get_test_config();
                 return $testconfigs if not ref $testconfigs eq 'ARRAY';
 
-                for (my $i=0; $i<= $#{$testconfigs}; $i++ ){
+                for (my $i=0; $i<= $#{$testconfigs}; $i++ ) {
                         my $prc_config = merge($common_config, $testconfigs->[$i]);
                         $prc_config->{guest_number} = $i;
                         my $suffix = "test-prc$i";
@@ -247,6 +247,7 @@ sub start_testrun
                         }
                 }
         }
+
         return 0;
 }
 
