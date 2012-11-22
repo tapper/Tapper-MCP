@@ -205,8 +205,7 @@ sub start_testrun
 
         my $net    = Tapper::MCP::Net->new();
         $net->cfg->{testrun_id} = $self->testrun->id;
-
-        given($self->mcp_info->test_type){
+        given(lc($self->mcp_info->test_type)){
                 when('simnow'){
                         $self->log->debug("Starting Simnow on $hostname");
                         my $simnow_retval = $net->start_simnow($hostname);
