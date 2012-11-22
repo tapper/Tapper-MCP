@@ -1003,6 +1003,8 @@ sub write_config
         my ($self, $config, $cfg_file) = @_;
         my $cfg = YAML::Dump($config);
         $cfg_file = $self->cfg->{paths}{localdata_path}."/$cfg_file" if not $cfg_file =~ m(^/);
+        my $dir = dirname($cfg_file);
+        $self->makedir($dir);
         open (my $file, ">", $cfg_file)
           or return "Can't open config file $cfg_file for writing: $!";
         print $file $cfg;
