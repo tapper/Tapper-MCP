@@ -339,7 +339,18 @@ sub get_state_config
         return $state;
 }
 
+=head2 skip_install
 
+Setter and getter for skip_install. This element is used to signal tests
+without any installer at all.
+
+=cut
+
+sub skip_install {
+        my ($self, $skip_install) = @_;
+        $self->mcp_info->{skip_install} = $skip_install if $skip_install;
+        return $self->mcp_info->{skip_install};
+}
 
 1;
 

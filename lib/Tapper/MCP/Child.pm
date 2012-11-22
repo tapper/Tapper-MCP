@@ -302,6 +302,7 @@ sub runtest_handling
                   ({
                     message => {state => 'takeoff'},
                     testrun_id => $self->testrun->id,
+                    skip_install => $self->mcp_info->skip_install,
                    });
                 $message->insert;
                 $self->state->update_state($message);

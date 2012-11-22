@@ -426,14 +426,16 @@ sub update_timeouts {
 The reboot call was successfully executed, now update the state for
 waiting for the first message.
 
+@param hash ref - message
+
 @return success - (0, timeout span for next state change)
 
 =cut
 
 sub msg_takeoff
 {
-        my ($self) = @_;
-        my $timeout_span = $self->state_details->takeoff();
+        my ($self, $msg) = @_;
+        my $timeout_span = $self->state_details->takeoff($msg->{skip_install});
         return (0, $timeout_span);
 }
 
