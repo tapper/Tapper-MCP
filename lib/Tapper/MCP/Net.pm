@@ -161,7 +161,7 @@ sub start_ssh
 
         my $tapper_script = $self->cfg->{files}{tapper_prc};
         my $tftp_host = $self->cfg->{mcp_host};
-        my $error = Net::SSH::ssh("$hostname","$tapper_script --host $tftp_host");
+        my $error = Net::SSH::ssh("$hostname","TAPPER_TEST_TYPE=ssh $tapper_script --host $tftp_host");
         return "Can not start PRC with ssh: $error" if $error;
         return 0;
 }
