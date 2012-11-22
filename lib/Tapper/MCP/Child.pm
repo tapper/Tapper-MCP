@@ -294,7 +294,7 @@ sub runtest_handling
         $self->state(Tapper::MCP::State->new(testrun_id => $self->testrun->id, cfg => $config));
         $self->state->state_init($self->mcp_info->get_state_config, $revive );
 
-        if ($self->state->compare_given_state('reboot_install') == 1) {
+        if ($self->state->compare_given_state('reboot_install') == 1) { # before reboot_install?
                 my $error = $self->start_testrun($hostname, $config);
                 return $error if $error;
 
