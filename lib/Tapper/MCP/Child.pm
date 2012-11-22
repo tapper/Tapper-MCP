@@ -310,9 +310,10 @@ sub runtest_handling
 
                 my $message = model('TestrunDB')->resultset('Message')->new
                   ({
-                    message => {state => 'takeoff'},
+                    message => {state => 'takeoff',
+                                skip_install => $self->mcp_info->skip_install,
+                               },
                     testrun_id => $self->testrun->id,
-                    skip_install => $self->mcp_info->skip_install,
                    });
                 $message->insert;
                 $self->state->update_state($message);
