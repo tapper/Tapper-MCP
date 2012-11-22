@@ -92,6 +92,10 @@ sub parse_hint_preconditions
                                              arch      => $precondition->{arch},
                                              dest_path => $precondition->{dest_path},
                                             } if $precondition->{arch};
+        } elsif ($precondition->{local}) {
+                $self->mcp_info->test_type('local');
+                $config->{prcs}->[0]->{skip_startscript} = 1;
+                $self->mcp_info->skip_install(1) if $precondition->{skip_install};
         }
         return $config;
 }

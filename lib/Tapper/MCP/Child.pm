@@ -226,6 +226,16 @@ sub start_testrun
                                 return ("Starting Tapper on testmachine with SSH failed: $ssh_retval");
                         }
                 }
+                when('local') {
+                        $self->log->debug("Starting LOCAL testrun on $hostname");
+                        my $local_retval;
+                        my $path_to_config = $config->{paths}{localdata_path}."/$hostname-install";
+                        $local_retval = $net->start_local($path_to_config);
+                        if ($local_retval) {
+                                $self->handle_error("Starting Tapper on testmachine with SSH", $local_retval);
+                                return ("Starting Tapper on testmachine with SSH failed: $local_retval");
+                        }
+                }
                 default {
                         $self->log->debug("Write grub file for $hostname");
                         my $grub_retval = $net->write_grub_file($hostname, $config->{installer_grub});

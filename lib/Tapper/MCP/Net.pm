@@ -166,6 +166,28 @@ sub start_ssh
         return 0;
 }
 
+=head2 start_local
+
+Start a testrun locally. This starts both the Installer and PRC.
+
+@param string - path to config
+
+@return success - 0
+@return error   - error string
+
+=cut
+
+sub start_local
+{
+        my ($self, $path_to_config) = @_;
+
+        my $error = qx(tapper-client --config $path_to_config);
+        return "Can not start PRC locally: $error" if $error;
+        return 0;
+}
+
+
+
 =head2 install_client_package
 
 Install client package of given architecture on given host at optional
