@@ -231,7 +231,7 @@ sub start_testrun
                         my $local_retval;
                         my $path_to_config = $self->mcp_info->skip_install ?
                           $config->{paths}{localdata_path}."/$hostname-test-prc0" :
-                            $config->{paths}{localdata_path}."/$hostname-install"
+                            $config->{paths}{localdata_path}."/$hostname-install";
                         $local_retval = $net->start_local($path_to_config);
                         if ($local_retval) {
                                 $self->handle_error("Starting Tapper on testmachine with SSH", $local_retval);
