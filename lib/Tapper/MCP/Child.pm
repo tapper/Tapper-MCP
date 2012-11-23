@@ -112,7 +112,7 @@ sub generate_configs
         $retval = $mcpconfig->write_config($config, "$hostname-install");
         return $retval if $retval;
 
-        if ($config->{autoinstall}) {
+        if ($config->{autoinstall} or $mcpconfig->mcp_info->skip_install) {
                 my $common_config = $mcpconfig->get_common_config();
                 $common_config->{hostname} = $hostname; # allows guest systems to know their host system name
 
@@ -229,7 +229,7 @@ sub start_testrun
                 when('local') {
                         $self->log->debug("Starting LOCAL testrun on $hostname");
                         my $local_retval;
-                        my $path_to_config = $config->{paths}{localdata_path}."/$hostname-install";
+                        my $path_to_config = $config->{paths}{localdata_path}."/$hostname-test-prc0";
                         $local_retval = $net->start_local($path_to_config);
                         if ($local_retval) {
                                 $self->handle_error("Starting Tapper on testmachine with SSH", $local_retval);
