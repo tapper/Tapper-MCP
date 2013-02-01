@@ -424,11 +424,6 @@ itself is put outside of function to allow testing.
                         }
 
                         foreach my $job (@jobs) {
-                                # (WORKAROUND) try to avoid to
-                                # children being started close
-                                # to each other and trying to
-                                # reset simulataneously
-                                sleep 2 unless HARNESS_ACTIVE;
                                 $self->run_due_tests($job);
                         }
                         $lastrun = time();
