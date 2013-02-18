@@ -29,6 +29,14 @@
     notes: autoinstall
     topic_name: Software
 
+- schema: TestrunScheduling
+  name: Autoinstall-Job
+  data:
+    id: 101
+    testrun_id: 1            # aaa
+    queue_id: 1              # Xen
+    status: schedule
+    host_id: 1
 
 # -------------------- preconditions
 
@@ -71,3 +79,13 @@
     testrun_id: 1
     precondition_id: 2
     succession: 2
+
+
+# ------------------ Hosts
+- schema: Host
+  name: iring
+  data:
+    id: 1
+    name: iring
+    free: 1
+    active: 1

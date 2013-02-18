@@ -52,7 +52,7 @@ is_deeply($retval->{preconditions}->[0],
           }, 'Config for PRC');
 
 
-$child->start_testrun('nosuchhost', $retval);
+$child->start_testrun($retval);
 
 my $mcp_host    = $default_config->{mcp_host};
 my $prc_program = $default_config->{files}{tapper_prc};

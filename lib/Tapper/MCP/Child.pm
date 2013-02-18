@@ -100,15 +100,15 @@ sub wait_for_testrun
 sub generate_configs
 {
 
-        my ($self, $hostname ) = @_;
+        my ($self ) = @_;
         my $retval;
 
 
         my $mcpconfig = Tapper::MCP::Config->new($self->testrun);
-        $self->log->debug("Create install config for $hostname");
         my $config   = $mcpconfig->create_config();
         return $config if not ref($config) eq 'HASH';
 
+        my $hostname = $self->testrun->testrun_scheduling->host->name;
         $retval = $mcpconfig->write_config($config, "$hostname-install");
         return $retval if $retval;
 
@@ -191,7 +191,6 @@ sub handle_error
 
 Start Installer on testmachine based on the type of testrun.
 
-@param string   - host name
 @param hash ref - config
 
 @return success - 0
@@ -201,10 +200,11 @@ Start Installer on testmachine based on the type of testrun.
 
 sub start_testrun
 {
-        my ($self, $hostname, $config) = @_;
+        my ($self, $config) = @_;
 
         my $net    = Tapper::MCP::Net->new();
         $net->cfg->{testrun_id} = $self->testrun->id;
+        my $hostname = $self->testrun->testrun_scheduling->host->name;
         given(lc($self->mcp_info->test_type)){
                 when('simnow'){
                         $self->log->debug("Starting Simnow on $hostname");
@@ -278,7 +278,7 @@ Start testrun and wait for completion.
 sub runtest_handling
 {
 
-        my  ($self, $hostname, $revive) = @_;
+        my  ($self, $revive) = @_;
 
         $0 = "tapper-mcp-child-".$self->testrun->id;
         $SIG{USR1} = sub {
@@ -292,11 +292,11 @@ sub runtest_handling
         my $net    = Tapper::MCP::Net->new();
         $net->cfg->{testrun_id} = $self->testrun->id;
 
-        my $config = $self->generate_configs($hostname);
+        my $config = $self->generate_configs();
         return $self->handle_error("Generating configs", $config) if ref $config ne 'HASH';
 
         if ($config->{testrun_stop}) {
-                my $host = model('TestrunDB')->resultset('Host')->search({name => $hostname});
+                my $host = $self->testrun->testrun_scheduling->host;
                 $host->active(0);
                 $host->comment($host->comment."(deactivated by testrun".$self->testrun->id.")");
                 $host->update;
@@ -307,7 +307,7 @@ sub runtest_handling
         $self->state->state_init($self->mcp_info->get_state_config, $revive );
 
         if ($self->state->compare_given_state('reboot_install') == 1) { # before reboot_install?
-                my $error = $self->start_testrun($hostname, $config);
+                my $error = $self->start_testrun($config);
                 return $error if $error;
 
                 my $message = model('TestrunDB')->resultset('Message')->new

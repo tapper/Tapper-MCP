@@ -94,7 +94,7 @@ if ($pid==0) {
         eval{
                 $SIG{ALRM}=sub{die("timeout of 70 seconds reached while waiting for 'quit in installer' test.");};
                 alarm(70);
-                $child->runtest_handling('bullock');
+                $child->runtest_handling();
         };
         is($@, '', 'Get messages in time');
         waitpid($pid,0);
@@ -130,7 +130,7 @@ if ($pid==0) {
         eval{
                 $SIG{ALRM}=sub{die("timeout of 70 seconds reached while waiting for 'quit in installer' test.");};
                 alarm(70);
-                $child->runtest_handling('bullock');
+                $child->runtest_handling();
         };
         is($@, '', 'Get messages in time');
         waitpid($pid,0);

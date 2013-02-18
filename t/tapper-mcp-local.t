@@ -41,7 +41,7 @@ $mock_child->mock('handle_error', sub { my ($self, $error_msg, $error_comment) =
                                                        comment => $error_comment}
                                 });
 my $child = Tapper::MCP::Child->new(13);
-my $error = $child->runtest_handling('einstein');
+my $error = $child->runtest_handling();
 is($error, 0, 'runtest_handling without error');
 eval {
         is($child->state->state_details->state_details->{current_state}, 'reboot_test','local test with skipped installation');

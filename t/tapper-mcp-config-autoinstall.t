@@ -117,7 +117,7 @@ $mock_child->mock('upload_files', sub{ return 0});
 my $testrun    = 1;
 my $child      = Tapper::MCP::Child->new($testrun);
 
-my $retval = $child->runtest_handling('dickstone');
+my $retval = $child->runtest_handling();
 is ($grubtext, "timeout 2
 
 title Boot from first hard disc

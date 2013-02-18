@@ -100,7 +100,7 @@ $mock_child->mock('tap_report_away', sub { my (undef, $new_tap_report) = @_; pus
 
 
 
-$retval =  $child->runtest_handling('bullock');
+$retval =  $child->runtest_handling();
 is($tap_reports[1], "1..1
 # Tapper-reportgroup-testrun: 4
 # Tapper-suite-name: Topic-Software
@@ -113,7 +113,7 @@ not ok 1 - timeout hit while waiting for installation
 
 @tap_reports = ();
 $child      = Tapper::MCP::Child->new(113);
-$retval =  $child->runtest_handling('bullock');
+$retval =  $child->runtest_handling();
 like($tap_reports[0],
           qr'1..1
 # Tapper-reportgroup-testrun: 113
