@@ -7,8 +7,6 @@ package Tapper::MCP::Master;
         use parent "Tapper::MCP";
         use Devel::Backtrace;
         use File::Path;
-        use IO::Select;
-        use IO::Handle;
         use Log::Log4perl;
         use POSIX ":sys_wait_h";
         use Try::Tiny;
@@ -45,23 +43,6 @@ Contains all information about all child processes.
 =cut
 
         has child        => (is => 'rw', isa => 'HashRef', default => sub {{}});
-
-=head2 consolefiles
-
-Output files for console logs ordered by file descriptor number.
-
-=cut
-
-        has consolefiles => (is => 'rw', isa => 'ArrayRef', default => sub {[]});
-
-
-=head2 readset
-
-IO::Select object containing all opened console file handles.
-
-=cut
-
-        has readset      => (is => 'rw');
 
 =head2
 
@@ -115,85 +96,6 @@ Set interrupt handlers for important signals. No parameters, no return values.
                 return 0;
         }
 
-=head2 console_open
-
-Open console connection for given host and appropriate console log output file
-for the testrun on host. Returns console on success or an error string for
-failure.
-
-@param string - system name
-@param int    - testrun id
-
-@retval success - IO::Socket::INET
-@retval error   - error string
-
-=cut
-
-        sub console_open
-        {
-                my ($self, $system, $testrunid) = @_;
-                return "Incomplete data given to function console_open" if not $system and defined($testrunid);
-
-                my $path = $self->cfg->{paths}{output_dir}."/$testrunid/";
-                File::Path::mkpath($path, {error => \my $retval}) if not -d $path;
-                foreach my $diag (@$retval) {
-                        my ($file, $message) = each %$diag;
-                        return "general error: $message\n" if $file eq '';
-                        return "Can't create $file: $message";
-                }
-
-                my $net = Tapper::MCP::Net->new();
-                my $console;
-                eval{
-                        local $SIG{ALRM} = sub { die 'Timeout'; };
-                        alarm (5);
-                        $console = $net->conserver_connect($system);
-                };
-                alarm 0;
-                return "Unable to open console for $system after 5 seconds" if $@;
-
-                return $console if not ref $console eq 'IO::Socket::INET';
-                $console->blocking(0);
-                $self->readset->add($console);
-
-
-                $path .= "console";
-                my $fh;
-                open($fh,">>",$path) or do {
-                        $self->readset->remove($console);
-                        close $console;
-                        return "Can't open console log file $path for test on host $system:$!";
-                };
-                $self->consolefiles->[$console->fileno()] = $fh;
-                return $console;
-        }
-
-
-=head2 console_close
-
-Close a given console connection.
-
-@param IO::Socket::INET - console connection socket
-
-@retval success - 0
-@retval error   - error string
-
-=cut
-
-        sub console_close
-        {
-                my ($self, $console) = @_;
-                return 0 if not ($console and $console->can('fileno'));
-                close $self->consolefiles->[$console->fileno()]
-                    or return "Can't close console file:$!";
-                $self->consolefiles->[$console->fileno()] = undef;
-                $self->readset->remove($console);
-                my $net = Tapper::MCP::Net->new();
-                $net->conserver_disconnect($console);
-                alarm 0;
-                return 0;
-        }
-
 =head2 handle_dead_children
 
 Each test run is handled by a child process. All information needed for
@@ -222,47 +124,6 @@ information when the test run is finished and the child process ends.
                 }
         }
 
-
-=head2 consolelogfrom
-
-Read console log from a handle and write it to the appropriate file.
-
-@param file handle - read from this handle
-
-@retval success - 0
-@retval error   - error string
-
-=cut
-
-        sub consolelogfrom
-        {
-                my ($self, $handle) = @_;
-                my ($buffer, $readsize);
-                my $timeout = 2;
-                my $maxread = 1024; # XXX configure
-                my $errormsg;
-
-                eval {
-                        local $SIG{ALRM} = sub { die "Timeout ($timeout) reached" };
-                        alarm $timeout;
-                        $readsize  = sysread($handle, $buffer, $maxread);
-                };
-                alarm 0;
-
-                $errormsg = "Error while reading console: $@" if $@;
-                $errormsg = "Can't read from console: $!"     if not defined $readsize;
-
-                my $file    = $self->consolefiles->[$handle->fileno()];
-                return "Can't get console file:$!" if not defined $file;
-
-                $buffer  .= "*** Tapper: $errormsg ***" if $errormsg;
-
-                $readsize = syswrite($file, $buffer);
-                return "Can't write console data to file :$!" if not defined $readsize;
-
-                return $errormsg if $errormsg;
-                return 0;
-        }
 
 =head2 notify_event
 
@@ -330,7 +191,7 @@ Run the tests that are due.
                         $retval = $@ if $@;
 
                         $self->notify_event('testrun_finished', {testrun_id => $id});
-
+                        $child->testrun_post_process();
                         if ( ($retval or $child->rerun) and $job->testrun->rerun_on_error) {
                                 my $cmd  = Tapper::Cmd::Testrun->new();
                                 my $new_id;
@@ -352,13 +213,6 @@ Run the tests that are due.
                         }
                         exit 0;
                 } else {
-                        my $console = $self->console_open($system, $id);
-
-                        if (ref($console) eq 'IO::Socket::INET') {
-                                $self->child->{$system}->{console}  = $console;
-                        } else {
-                                $self->log->info("Can not open console on $system: $console");
-                        }
 
                         $self->child->{$system}->{pid}      = $pid;
                         $self->child->{$system}->{test_run} = $id;
@@ -382,52 +236,30 @@ itself is put outside of function to allow testing.
                 my $timeout          = $lastrun + $self->cfg->{times}{poll_intervall} - time();
                 $timeout = 0 if $timeout < 0;
 
-                my @ready;
-                # if readset is empty, can_read immediately returns with an empty
-                # array; this makes runloop a CPU burn loop
-                if ($self->readset->count) {
-                        @ready = $self->readset->can_read( $timeout );
-                } else {
-                        sleep $timeout;
-                }
+                sleep $timeout;
                 $self->handle_dead_children() if $self->dead_child;
 
-        HANDLE:
-                foreach my $handle (@ready) {
-                        if (not $handle->opened()) {
-                                $self->readset->remove($handle);
-                                next HANDLE;
-                        }
 
-                        my $retval = $self->consolelogfrom($handle);
-                        if ($retval) {
-                                $self->log->error($retval);
-                                $self->console_close($handle);
-                        }
-                }
-
-                if (($timeout <= 0) or (not @ready)) {
-                        my @jobs;
-                        my $pid = open(my $fh, "-|");
-                        if ($pid == 0) {
-                                my @jobs = $self->scheduler->get_next_job;
-                                print join ",", map {$_->id} @jobs;
-                                exit;
-                        } else {
-                                my $ids_joined = <$fh>;
-                                {
-                                        no warnings 'uninitialized'; # we may not have ids_joined when no test is due
-                                        foreach my $next_id (split ',', $ids_joined) {
-                                                push @jobs, model('TestrunDB')->resultset('TestrunScheduling')->find($next_id);
-                                        }
+                my @jobs;
+                my $pid = open(my $fh, "-|");
+                if ($pid == 0) {
+                        my @jobs = $self->scheduler->get_next_job;
+                        print join ",", map {$_->id} @jobs;
+                        exit;
+                } else {
+                        my $ids_joined = <$fh>;
+                        {
+                                no warnings 'uninitialized'; # we may not have ids_joined when no test is due
+                                foreach my $next_id (split ',', $ids_joined) {
+                                        push @jobs, model('TestrunDB')->resultset('TestrunScheduling')->find($next_id);
                                 }
                         }
-
-                        foreach my $job (@jobs) {
-                                $self->run_due_tests($job);
-                        }
-                        $lastrun = time();
                 }
+
+                foreach my $job (@jobs) {
+                        $self->run_due_tests($job);
+                }
+                $lastrun = time();
 
                 return $lastrun;
         }
@@ -445,11 +277,6 @@ Create communication data structures used in MCP.
         {
                 my ($self) = @_;
                 Log::Log4perl->init($self->cfg->{files}{log4perl_cfg});
-                # these sets are used by select()
-                my $select = IO::Select->new();
-                return "Can't create select object:$!" if not $select;
-                $self->readset ($select);
-                return "Can't create select object:$!" if not $select;
 
                 return 0;
         }

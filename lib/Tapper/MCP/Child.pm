@@ -5,6 +5,7 @@ use 5.010;
 use strict;
 use warnings;
 
+use Class::Load 'load_class';
 use Hash::Merge::Simple qw/merge/;
 use List::Util qw(min max);
 use Moose;
@@ -15,6 +16,7 @@ use Tapper::MCP::Net;
 use Tapper::MCP::Config;
 use Tapper::Model 'model';
 use Tapper::MCP::State;
+use Tapper::MCP::Plugin;
 use Devel::Backtrace;
 
 use constant BUFLEN     => 1024;
@@ -22,10 +24,13 @@ use constant ONE_MINUTE => 60;
 
 extends 'Tapper::MCP::Control';
 with 'Tapper::MCP::Net::TAP';
+with 'Tapper::MCP::Plugin';
 
 has state    => (is => 'rw');
 has mcp_info => (is => 'rw');
 has rerun    => (is => 'rw', default => 0);
+has plugin_conf => (is => 'ro', default => sub {{}}, isa => 'HashRef'); # get the config for creating the plugin object
+
 
 =head1 SYNOPSIS
 
@@ -164,6 +169,8 @@ sub report_mcp_results
                 $headerlines = $self->prc_headerlines($prc_number);
                 $self->tap_report_send($prc_results, $headerlines);
         }
+        $self->console_stop();
+
         $self->upload_files($report_id, $self->testrun->id );
 }
 
@@ -244,7 +251,7 @@ sub start_testrun
                         return $self->handle_error("Writing grub file", $grub_retval) if $grub_retval;
 
                         $self->log->debug("rebooting $hostname");
-                        my $reboot_retval = $net->reboot_system($hostname);
+                        my $reboot_retval = $self->host_start();
                         if ($reboot_retval) {
                                 $self->handle_error("Booting machine", $reboot_retval);
                                 return $reboot_retval;
@@ -279,6 +286,8 @@ sub runtest_handling
 {
 
         my  ($self, $revive) = @_;
+
+        $self->console_start();
 
         $0 = "tapper-mcp-child-".$self->testrun->id;
         $SIG{USR1} = sub {
