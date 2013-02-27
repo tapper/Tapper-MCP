@@ -33,16 +33,17 @@ around BUILDARGS => sub {
 
 
         my $args;
-        if ( @_ == 1 and not $_[0] eq 'HASH' ) {
-                $args = $class->$orig(testrun => $_[0]);
-        } else {
-                $args = $class->$orig(@_);
+        if ( @_ == 1) {
+                if (not ref $_[0] eq 'HASH' )  {
+                        $args->{testrun} = $_[0];
+                } else {
+                        $args = shift;
+                }
+                if (not ref $args->{testrun}) {
+                        $args->{testrun} = model->resultset('Testrun')->find($args->{testrun});
+                }
+                return $args;
         }
-        if (not ref $args->{testrun}) {
-                $args->{testrun} = model->resultset('Testrun')->find($args->{testrun});
-        }
-        return $args;
-
 };
 
 1;

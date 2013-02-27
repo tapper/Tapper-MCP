@@ -37,8 +37,7 @@ construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb
 # -----------------------------------------------------------------------------------------------------------------
 
 my $testrun = model('TestrunDB')->resultset('Testrun')->find(23);
-
-my $conf_obj = Tapper::MCP::Config->new(testrun => $testrun);
+my $conf_obj = Tapper::MCP::Config->new({testrun => $testrun});
 my $config = $conf_obj->create_config;
 is(int @{$config->{preconditions}->[35]->{config}->{testprogram_list}}, 5, 'Testprogram list in guest 2 not doubled');
 is_deeply($config->{preconditions}->[34]->{config}->{testprogram_list}->[5], {runtime => 5,
