@@ -322,7 +322,7 @@ Run the tests that are due.
                         my $child = Tapper::MCP::Child->new( $id );
                         my $retval;
                         eval {
-                                $retval = $child->runtest_handling( $system, $revive );
+                                $retval = $child->runtest_handling( $revive );
                         };
                         $retval = $@ if $@;
 
