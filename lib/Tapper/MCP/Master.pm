@@ -84,8 +84,8 @@ Set interrupt handlers for important signals. No parameters, no return values.
 
                         # stop all children
                         $SIG{CHLD} = 'IGNORE';
-                        foreach my $this_child (keys %{$self->child}) {
-                                kill 15, $self->child->{$this_child}->{pid};
+                        foreach my $pid (keys %{$self->child}) {
+                                kill 15, $pid;
                         }
 
                         my $backtrace = Devel::Backtrace->new(-start=>2, -format => '%I. %s');
@@ -110,17 +110,15 @@ information when the test run is finished and the child process ends.
         CHILD: while ($self->dead_child) {
                         $self->log->debug("Number of dead children is ".$self->dead_child);
                         my $dead_pid = waitpid(-1, WNOHANG);  # don't use wait(); qx() sends a SIGCHLD and increases $self->deadchild, but wait() for the return value and thus our wait would block
-                CHILDREN_CHECK: foreach my $this_child (keys %{$self->child})
-                        {
-                                if ($self->child->{$this_child}->{pid} == $dead_pid) {
-                                        $self->log->debug("$this_child finished");
-                                        $self->scheduler->mark_job_as_finished( $self->child->{$this_child}->{job} );
-                                        $self->console_close( $self->child->{$this_child}->{console} );
-                                        delete $self->child->{$this_child};
-                                        last CHILDREN_CHECK;
-                                }
-                        }
+
                         $self->dead_child($self->dead_child - 1);
+                        next if not $self->child->{$dead_pid}; # sig raised by qx()
+
+                        my $host = $self->child->{$dead_pid}->{job}->testrun->host->name;
+                        $self->log->debug("test on $host finished");
+                        $self->scheduler->mark_job_as_finished( $self->child->{$dead_pid}->{job} );
+                        $self->console_close( $self->child->{$dead_pid}->{console} );
+                        delete $self->child->{$dead_pid};
                 }
         }
 
@@ -173,7 +171,6 @@ Run the tests that are due.
 
                 $self->log->info("start testrun $id on $system");
                 # check if this system is already active, just for error handling
-                $self->handle_dead_children() if $self->child->{$system};
 
                 $self->scheduler->mark_job_as_running($job) unless $revive;
 
@@ -186,7 +183,7 @@ Run the tests that are due.
                         my $child = Tapper::MCP::Child->new( $id );
                         my $retval;
                         eval {
-                                $retval = $child->runtest_handling( $system, $revive );
+                                $retval = $child->runtest_handling( $revive );
                         };
                         $retval = $@ if $@;
 
@@ -214,9 +211,8 @@ Run the tests that are due.
                         exit 0;
                 } else {
 
-                        $self->child->{$system}->{pid}      = $pid;
-                        $self->child->{$system}->{test_run} = $id;
-                        $self->child->{$system}->{job}      = $job;
+                        $self->child->{"$pid"}->{test_run} = $id;
+                        $self->child->{"$pid"}->{job}      = $job;
                 }
                 return 0;
 
