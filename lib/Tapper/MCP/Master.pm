@@ -114,10 +114,9 @@ information when the test run is finished and the child process ends.
                         $self->dead_child($self->dead_child - 1);
                         next if not $self->child->{$dead_pid}; # sig raised by qx()
 
-                        my $host = $self->child->{$dead_pid}->{job}->testrun->host->name;
+                        my $host = $self->child->{$dead_pid}->{job}->host->name;
                         $self->log->debug("test on $host finished");
                         $self->scheduler->mark_job_as_finished( $self->child->{$dead_pid}->{job} );
-                        $self->console_close( $self->child->{$dead_pid}->{console} );
                         delete $self->child->{$dead_pid};
                 }
         }
