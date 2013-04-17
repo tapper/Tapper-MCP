@@ -906,7 +906,9 @@ sub get_common_config
                 $config->{testplan} = { id => $testrun->testplan_id, path => $testrun->testplan_instance->path };
         }
 
-        if ($self->testrun->scenario_element) {
+        if ($self->testrun->scenario_element and
+            not eval {$self->testrun->scenario_element->scenario->options->{no_sync}} # shortest way to deal with undefined options
+           ) {
                 $config->{scenario_id} = $self->testrun->scenario_element->scenario_id;
                 my $path = $config->{paths}{sync_path}."/".$config->{scenario_id}."/";
                 $config->{files}{sync_file} = "$path/syncfile";
