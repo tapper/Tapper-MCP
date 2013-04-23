@@ -907,6 +907,7 @@ sub get_common_config
         }
 
         if ($self->testrun->scenario_element and
+            $self->testrun->scenario_element->scenario->type eq 'interdep' and
             not eval {$self->testrun->scenario_element->scenario->options->{no_sync}} # shortest way to deal with undefined options
            ) {
                 $config->{scenario_id} = $self->testrun->scenario_element->scenario_id;
