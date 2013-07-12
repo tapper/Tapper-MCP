@@ -63,6 +63,21 @@ sub BUILD
 }
 
 
+=head2 cleanup_output_dir
+
+Clean up the output directory for this test.
+
+@param int - testrun id
+
+=cut
+
+sub cleanup_output_dir
+{
+        my ($self, $testrun_id) = @_;
+        my $path = $self->cfg->{paths}{output_dir}."/$testrun_id";
+        File::Path::rmtree($path);
+}
+
 =head2 set_interrupt_handlers
 
 Set interrupt handlers for important signals. No parameters, no return values.
@@ -179,6 +194,9 @@ Run the tests that are due.
                 # hello child
                 if ($pid == 0) {
 
+                        # don't leave creating output dir to later workers (Installer/PRC)
+                        $self->makedir($self->cfg->{paths}{output_dir}."/$id");
+
                         my $child = Tapper::MCP::Child->new( $id );
                         my $retval;
                         eval {
@@ -187,6 +205,7 @@ Run the tests that are due.
                         $retval = $@ if $@;
 
                         $self->notify_event('testrun_finished', {testrun_id => $id});
+                        $self->cleanup_output_dir($id);
                         $child->testrun_post_process();
                         if ( ($retval or $child->rerun) and $job->testrun->rerun_on_error) {
                                 my $cmd  = Tapper::Cmd::Testrun->new();
