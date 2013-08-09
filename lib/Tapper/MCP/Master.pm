@@ -211,7 +211,8 @@ Run the tests that are due.
                                 my $cmd  = Tapper::Cmd::Testrun->new();
                                 my $new_id;
                                 eval {
-                                        $new_id = $cmd->rerun($id, {rerun_on_error => $job->testrun->rerun_on_error - 1});
+                                        my $or_new_testrun = $cmd->rerun($id, {rerun_on_error => $job->testrun->rerun_on_error - 1});
+                                           $new_id         = $or_new_testrun->id;
                                 };
                                 if ($@) {
                                         $self->log->error($@);
