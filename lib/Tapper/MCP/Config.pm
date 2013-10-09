@@ -906,10 +906,7 @@ sub get_common_config
                 $config->{testplan} = { id => $testrun->testplan_id, path => $testrun->testplan_instance->path };
         }
 
-        if ($self->testrun->scenario_element and
-            $self->testrun->scenario_element->scenario->type eq 'interdep' and
-            not eval {$self->testrun->scenario_element->scenario->options->{no_sync}} # shortest way to deal with undefined options
-           ) {
+        if ($self->testrun->scenario_element) {
                 $config->{scenario_id} = $self->testrun->scenario_element->scenario_id;
                 my $path = $config->{paths}{sync_path}."/".$config->{scenario_id}."/";
                 $config->{files}{sync_file} = "$path/syncfile";
@@ -927,17 +924,21 @@ sub get_common_config
                                         return "Can't create $file: $message";
                                 }
                         }
-                        my @peers = map {$_->testrun->testrun_scheduling->host->name} $self->testrun->scenario_element->peer_elements->all;
-                        if (sysopen(my $fh, $config->{files}{sync_file}, O_CREAT | O_EXCL |O_RDWR )) {
-                                print $fh $self->testrun->scenario_element->peer_elements->count;
-                                close $fh;
-                        }       # else trust the creator
-                        my $error;
-                        try {
-                                YAML::DumpFile($config->{files}{sync_file}, \@peers);
-                        } catch { $error = $_};
-                        return $error if $error;
 
+                        # shortest way to deal with undefined options
+                        if (not eval {$self->testrun->scenario_element->scenario->options->{no_sync}})
+                        {
+                                my @peers = map {$_->testrun->testrun_scheduling->host->name} $self->testrun->scenario_element->peer_elements->all;
+                                if (sysopen(my $fh, $config->{files}{sync_file}, O_CREAT | O_EXCL |O_RDWR )) {
+                                        print $fh $self->testrun->scenario_element->peer_elements->count;
+                                        close $fh;
+                                } # else trust the creator
+                                my $error;
+                                try {
+                                        YAML::DumpFile($config->{files}{sync_file}, \@peers);
+                                } catch { $error = $_};
+                                return $error if $error;
+                        }
                 }
         }
         return ($config);
