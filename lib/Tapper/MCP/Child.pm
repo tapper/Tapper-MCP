@@ -114,7 +114,9 @@ sub generate_configs
         return $config if not ref($config) eq 'HASH';
 
         my $hostname = $self->testrun->testrun_scheduling->host->name;
-        $retval = $mcpconfig->write_config($config, "$hostname-install");
+        my $config_file_name = "$hostname-install-".$self->testrun->id;
+
+        $retval = $mcpconfig->write_config($config, $config_file_name);
         return $retval if $retval;
 
         if ($config->{autoinstall} or $mcpconfig->mcp_info->skip_install) {
@@ -128,6 +130,7 @@ sub generate_configs
                         my $prc_config = merge($common_config, $testconfigs->[$i]);
                         $prc_config->{guest_number} = $i;
                         my $suffix = "test-prc$i";
+                        $suffix   .= "-".$self->testrun->id;
 
                         $retval = $mcpconfig->write_config($prc_config, "$hostname-$suffix");
                         return $retval if $retval;
@@ -236,9 +239,10 @@ sub start_testrun
                 when('local') {
                         $self->log->debug("Starting LOCAL testrun on $hostname");
                         my $local_retval;
+                        my $tr_id = $self->testrun->id;
                         my $path_to_config = $self->mcp_info->skip_install ?
-                          $config->{paths}{localdata_path}."/$hostname-test-prc0" :
-                            $config->{paths}{localdata_path}."/$hostname-install";
+                          $config->{paths}{localdata_path}."/$hostname-test-prc0-$tr_id" :
+                            $config->{paths}{localdata_path}."/$hostname-install-$tr_id";
                         $local_retval = $net->start_local($path_to_config);
                         if ($local_retval) {
                                 $self->handle_error("Starting Tapper on testmachine with SSH", $local_retval);
