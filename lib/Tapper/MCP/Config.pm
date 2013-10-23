@@ -908,7 +908,8 @@ sub get_common_config
 
         if ($self->testrun->scenario_element) {
                 $config->{scenario_id} = $self->testrun->scenario_element->scenario_id;
-                my $path = $config->{paths}{sync_path}."/".$config->{scenario_id}."/";
+                $config->{paths}{sync_path}.="/".$config->{scenario_id}."/";
+                my $path = $config->{paths}{sync_path};
                 $config->{files}{sync_file} = "$path/syncfile";
 
                 if ($self->testrun->scenario_element->peer_elements->search({}, {rows => 1})->first->testrun->id == $testrun->id) {
