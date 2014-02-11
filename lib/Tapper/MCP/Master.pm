@@ -205,8 +205,8 @@ Run the tests that are due.
                         $retval = $@ if $@;
 
                         $self->notify_event('testrun_finished', {testrun_id => $id});
-                        $self->cleanup_output_dir($id);
                         $child->testrun_post_process();
+                        $self->cleanup_output_dir($id);
                         if ( ($retval or $child->rerun) and $job->testrun->rerun_on_error) {
                                 my $cmd  = Tapper::Cmd::Testrun->new();
                                 my $new_id;
