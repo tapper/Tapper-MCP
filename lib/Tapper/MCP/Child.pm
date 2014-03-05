@@ -31,7 +31,6 @@ has mcp_info => (is => 'rw');
 has rerun    => (is => 'rw', default => 0);
 has plugin_conf => (is => 'ro', default => sub {{}}, isa => 'HashRef'); # get the config for creating the plugin object
 
-
 =head1 SYNOPSIS
 
  use Tapper::MCP::Child;
@@ -58,10 +57,11 @@ sub get_messages
         my $end_time = time() + $timeout;
 
         my $messages;
-        while () {
+        while (1) {
                 $messages = $self->testrun->message;
                 last if ($messages and $messages->count) or time() > $end_time;
-                sleep 1 unless $ENV{HARNESS_ACTIVE};
+                Tapper::Model::model('TestrunDB')->storage->disconnect;
+                sleep $self->cfg->{mcp}{child}{get_message_sleep_interval} unless $ENV{HARNESS_ACTIVE};
         }
         return $messages;
 }
