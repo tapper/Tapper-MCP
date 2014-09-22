@@ -81,7 +81,7 @@ if (ref($config) eq 'HASH') {
         fail("Get_common_config returned error string $config");
 }
 
-my $syncfile = $config->{paths}{sync_path}."/".$testrun->scenario_element->scenario_id."/syncfile";
+my $syncfile = "$config->{paths}{sync_path}/syncfile";
 ok(-e $syncfile, "Syncfile $syncfile exists");
 eval
 {

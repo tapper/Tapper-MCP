@@ -63,6 +63,21 @@ sub BUILD
 }
 
 
+=head2 cleanup_output_dir
+
+Clean up the output directory for this test.
+
+@param int - testrun id
+
+=cut
+
+sub cleanup_output_dir
+{
+        my ($self, $testrun_id) = @_;
+        my $path = $self->cfg->{paths}{output_dir}."/$testrun_id";
+        File::Path::rmtree($path);
+}
+
 =head2 set_interrupt_handlers
 
 Set interrupt handlers for important signals. No parameters, no return values.
@@ -136,7 +151,7 @@ Inform the notification framework that an event occured in MCP.
                 my ($self, $event, $message) = @_;
                 try
                 {
-                        my $new_event = model('ReportsDB')->resultset('NotificationEvent')->new({type => $event,
+                        my $new_event = model('TestrunDB')->resultset('NotificationEvent')->new({type => $event,
                                                                                                  message => $message,
                                                                                                 });
                         $new_event->insert();
@@ -179,6 +194,9 @@ Run the tests that are due.
                 # hello child
                 if ($pid == 0) {
 
+                        # don't leave creating output dir to later workers (Installer/PRC)
+                        $self->makedir($self->cfg->{paths}{output_dir}."/$id");
+
                         my $child = Tapper::MCP::Child->new( $id );
                         my $retval;
                         eval {
@@ -188,11 +206,13 @@ Run the tests that are due.
 
                         $self->notify_event('testrun_finished', {testrun_id => $id});
                         $child->testrun_post_process();
+                        $self->cleanup_output_dir($id);
                         if ( ($retval or $child->rerun) and $job->testrun->rerun_on_error) {
                                 my $cmd  = Tapper::Cmd::Testrun->new();
                                 my $new_id;
                                 eval {
-                                        $new_id = $cmd->rerun($id, {rerun_on_error => $job->testrun->rerun_on_error - 1});
+                                        my $or_new_testrun = $cmd->rerun($id, {rerun_on_error => $job->testrun->rerun_on_error - 1});
+                                           $new_id         = $or_new_testrun->id;
                                 };
                                 if ($@) {
                                         $self->log->error($@);

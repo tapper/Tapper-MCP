@@ -336,6 +336,11 @@ sub get_state_config
                                 };
                 push @{$state->{prcs}}, $prc_state;
         }
+
+        # when we don't install, PRC 0 starts in state 'boot'
+        if ($self->mcp_info->{skip_install}) {
+                $state->{prcs}->[0]->{current_state} = 'boot';
+        }
         return $state;
 }
 
@@ -349,6 +354,7 @@ without any installer at all.
 sub skip_install {
         my ($self, $skip_install) = @_;
         $self->mcp_info->{skip_install} = $skip_install if $skip_install;
+
         return $self->mcp_info->{skip_install};
 }
 
