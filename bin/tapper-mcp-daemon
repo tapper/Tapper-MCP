@@ -1,4 +1,4 @@
-#! /usr/bin/env perl
+#! /usr/bin/perl
 
 # PODNAME: tapper-mcp-daemon
 # ABSTRACT: cmdline frontend to Tapper::MCP/daemonize
@@ -17,6 +17,6 @@ $ENV{MX_DAEMON_STDERR} = '/tmp/tapper_mcp_daemon_stderr.log' if not -w $ENV{MX_D
 
 my $mcp = Tapper::MCP::Daemon->new(
     basedir => getcwd,
-    pidfile => '/var/run/tapper/tapper-mcp-daemon.pid'
+    pidfile => '/tmp/tapper-mcp-daemon.pid'
 );
 $mcp->run;
