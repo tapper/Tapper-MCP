@@ -13,7 +13,7 @@ sub BUILD {
             $config->{plugin_conf}
            ) {
                 my $plug_conf = $config->{plugin_conf};
-                foreach my $task (keys $plug_conf) {
+                foreach my $task (keys %$plug_conf) {
                         my $role = "Tapper::MCP::Plugin";
                         $role   .= "::$task";
                         $role   .= "::".$plug_conf->{$task};
