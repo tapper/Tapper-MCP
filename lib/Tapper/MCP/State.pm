@@ -3,6 +3,7 @@ package Tapper::MCP::State;
 use 5.010;
 use strict;
 use warnings;
+no warnings "experimental::smartmatch";
 
 use Moose;
 use List::Util qw/max min reduce/;
@@ -186,6 +187,7 @@ in reads.
 
 sub get_current_timeout_span
 {
+        no warnings "experimental::smartmatch";
         my ($self) = @_;
         my $new_timeout_date;
         my $keep_alive_timeout_date = $self->state_details->keep_alive_timeout_date;
@@ -238,6 +240,7 @@ Update the timeout during installation.
 
 sub update_installer_timeout
 {
+        no warnings "experimental::smartmatch";
         my ($self) = @_;
         my $now = time();
         my $installer_timeout_date = $self->state_details->installer_timeout_current_date;
@@ -268,6 +271,7 @@ Check and update timeouts for one PRC.
 
 sub update_prc_timeout
 {
+        no warnings "experimental::smartmatch";
         my ($self, $prc_number) = @_;
         my $now = time();
         if ($self->state_details->prc_timeout_current_date($prc_number) < $now) {
@@ -307,6 +311,7 @@ Update timeouts during test phase.
 
 sub update_test_timeout
 {
+        no warnings "experimental::smartmatch";
         my ($self) = @_;
         my $now = time();
 
@@ -396,6 +401,7 @@ Update the timeouts in $self->state_details structure.
 =cut
 
 sub update_timeouts {
+        no warnings "experimental::smartmatch";
         my ($self) = @_;
         my ( $error, $timeout_span );
 
@@ -806,6 +812,7 @@ Update state machine based on message.
 
 sub next_state
 {
+        no warnings "experimental::smartmatch";
         my ($self, $msg) = @_;
         my ($error, $timeout_span);
 

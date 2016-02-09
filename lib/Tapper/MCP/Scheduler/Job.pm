@@ -90,6 +90,7 @@ sub match_host {
 
 our @functions;
 BEGIN {
+        no warnings "experimental::smartmatch";
         my $features = Tapper::Model::model->resultset('HostFeature')->search(
                                                                               {
                                                                               },
