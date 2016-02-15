@@ -1,6 +1,20 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - internal refactoring
+        - use MooseX::Daemonize for daemon
+        - plugin system for organizing MCP functionality
+        - now as plugins: console handling, reset handling
+        - host pool handling: many "anonymous" hosts that have a
+          common name where only the count matters but not the
+          particular single name. Think of cloud instances.
+        - merged TestrunDB/ReportsDB
+        - polishing edge cases around:
+          * MCP chil exit handling
+          * state handling when installation is skipped
+          * output directory cleanup
+          * interdependent scenarios
+          * explicit db disconnects in MCP children
 
 4.1.2     2012-11-23
         - new precondition hint 'local' to run a PRC locally
