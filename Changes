@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.0     2016-02-15
         - internal refactoring
         - use MooseX::Daemonize for daemon
         - plugin system for organizing MCP functionality
