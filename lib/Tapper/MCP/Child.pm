@@ -4,7 +4,7 @@ package Tapper::MCP::Child;
 use 5.010;
 use strict;
 use warnings;
-no warnings "experimental::smartmatch";
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 use Class::Load 'load_class';
 use Hash::Merge::Simple qw/merge/;
@@ -211,7 +211,7 @@ Start Installer on testmachine based on the type of testrun.
 
 sub start_testrun
 {
-        no warnings "experimental::smartmatch";
+        no if $] >= 5.017011, warnings => 'experimental::smartmatch';
         my ($self, $config) = @_;
 
         my $net    = Tapper::MCP::Net->new();

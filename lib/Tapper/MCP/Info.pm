@@ -1,6 +1,6 @@
 package Tapper::MCP::Info;
-use 5.010;
 
+use 5.010;
 use Moose;
 
 extends 'Tapper::MCP';

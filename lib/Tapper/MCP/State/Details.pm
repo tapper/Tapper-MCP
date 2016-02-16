@@ -3,7 +3,7 @@ package Tapper::MCP::State::Details;
 use 5.010;
 use strict;
 use warnings;
-no warnings "experimental::smartmatch";
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 use Moose;
 use List::Util qw/max min/;
@@ -400,7 +400,7 @@ Set next PRC timeout as current and return it as timeout span.
 
 sub prc_next_timeout
 {
-        no warnings "experimental::smartmatch";
+        no if $] >= 5.017011, warnings => 'experimental::smartmatch';
         my ($self, $num) = @_;
         my $prc = $self->state_details->{prcs}->[$num];
         my $default_timeout = 60 + 60; # (time between SIGTERM and SIGKILL in PRC) + (grace period for sending the message)

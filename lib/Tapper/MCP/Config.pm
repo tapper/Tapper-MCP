@@ -2,7 +2,7 @@ package Tapper::MCP::Config;
 
 use strict;
 use warnings;
-no warnings "experimental::smartmatch";
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 use 5.010;
 use Data::DPath 'dpath';
@@ -176,7 +176,7 @@ Parse host definition of a virt precondition and change config accordingly
 
 sub parse_virt_host
 {
-        no warnings "experimental::smartmatch";
+        no if $] >= 5.017011, warnings => 'experimental::smartmatch';
         my ($self, $config, $virt) = @_;
         given (lc($virt->{host}->{root}->{precondition_type})) {
                 when ('image') {
@@ -237,7 +237,7 @@ sub parse_virt_preconditions
 
                 # if we have a qcow image, we need a raw image to copy PRC stuff to
                 no warnings 'uninitialized';
-                no warnings "experimental::smartmatch";
+                no if $] >= 5.017011, warnings => 'experimental::smartmatch';
                 given($guest->{root}{mounttype})
                 {
                         when ('raw') {
@@ -681,7 +681,7 @@ returns the updated virt precondition.
 
 sub produce_virt_precondition
 {
-        no warnings "experimental::smartmatch";
+        no if $] >= 5.017011, warnings => 'experimental::smartmatch';
         my ($self, $config, $precondition) = @_;
         local $Data::DPath::USE_SAFE; # path not from user, Safe.pm deactivated for debug and speed
         my $producers = $precondition ~~ dpath '//*[key eq "precondition_type" and lc(value) eq "produce"]/../..';
@@ -722,7 +722,7 @@ Parse a given precondition and update the config accordingly.
 
 sub parse_precondition
 {
-        no warnings "experimental::smartmatch";
+        no if $] >= 5.017011, warnings => 'experimental::smartmatch';
         my ($self, $config, $precondition_result) = @_;
         my $precondition = $precondition_result->precondition_as_hash;
 
