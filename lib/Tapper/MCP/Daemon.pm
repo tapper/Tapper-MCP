@@ -32,7 +32,7 @@ sub run
         my $self = shift;
 
         my ($command) = @ARGV ? @ARGV : @_;
-        return unless $command && grep /^$command$/, qw(start status restart stop);
+        return unless $command && grep /^$command$/, qw(start status stop);
         $self->$command;
         say $self->status_message;
 }

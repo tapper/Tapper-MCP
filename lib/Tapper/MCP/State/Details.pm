@@ -76,7 +76,7 @@ sub results
                 push @{$self->state_details->{results}}, $result;
                 $self->db_update();
         }
-        return $self->state_details->{results};
+        return $self->state_details->{results} if $self->state_details->{results};
 }
 
 =head2 state_init
@@ -148,7 +148,7 @@ sub current_state
                 $self->state_details->{current_state} = $state;
                 $self->db_update;
         }
-        return $self->state_details->{current_state};
+        return $self->state_details->{current_state} if $self->state_details->{current_state};
 }
 
 =head2 set_all_prcs_current_state
@@ -183,8 +183,10 @@ Getter and setter for keep_alive_timeout_date
 sub keep_alive_timeout_date
 {
         my ($self, $timeout_date) = @_;
-        $self->state_details->{keep_alive}{timeout_date} = $timeout_date if defined $timeout_date;
-        $self->state_details->{keep_alive}{timeout_date};
+        if ($self->state_details) {
+            $self->state_details->{keep_alive}{timeout_date} = $timeout_date if defined $timeout_date;
+            $self->state_details->{keep_alive}{timeout_date};
+        }
 }
 
 
