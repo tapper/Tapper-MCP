@@ -180,6 +180,8 @@ Run the tests that are due.
                 my ($self, $job, $revive) = @_;
                 $self->log->debug('run_due_test');
 
+                return 1 if not $job->host;
+
                 my $system = $job->host->name;
                 my $id = $job->testrun->id;
 
