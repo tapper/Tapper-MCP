@@ -254,28 +254,12 @@ itself is put outside of function to allow testing.
                 sleep $timeout;
                 $self->handle_dead_children() if $self->dead_child;
 
-
-                my @jobs;
-                my $pid = open(my $fh, "-|");
-                if ($pid == 0) {
-                        my @jobs = $self->scheduler->get_next_job;
-                        print join ",", map {$_->id} @jobs;
-                        exit;
-                } else {
-                        my $ids_joined = <$fh>;
-                        {
-                                no warnings 'uninitialized'; # we may not have ids_joined when no test is due
-                                foreach my $next_id (split ',', $ids_joined) {
-                                        push @jobs, model('TestrunDB')->resultset('TestrunScheduling')->find($next_id);
-                                }
-                        }
-                }
-
+                my @jobs = $self->scheduler->get_next_job;
                 foreach my $job (@jobs) {
                         $self->run_due_tests($job);
                 }
-                $lastrun = time();
 
+                $lastrun = time();
                 return $lastrun;
         }
 
