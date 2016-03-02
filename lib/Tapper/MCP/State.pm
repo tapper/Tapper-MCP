@@ -222,9 +222,7 @@ Initialize the state or reload it from database.
 sub state_init
 {
         my ($self, $data, $revive) = @_;
-        if (not $revive) {
-                $self->state_details->state_init($data);
-        }
+        $self->state_details->state_init($data, $revive);
         return 0;
 }
 
@@ -904,7 +902,7 @@ Tells caller whether the testrun is already finished or not.
 
 sub testrun_finished
 {
-        shift->state_details->current_state eq 'finished' ? 1 : 0;
+        ($_[0]->state_details->current_state eq 'finished' or $_[0]->{testrun_id} eq 'finished') ? 1 : 0;
 }
 
 1;
