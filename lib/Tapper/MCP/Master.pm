@@ -229,7 +229,6 @@ Run the tests that are due.
                         } else {
                                 $self->log->info("Testrun $id ($system) finished successfully");
                         }
-                        $self->scheduler->mark_job_as_finished($job);
                         exit 0;
                 } else {
 

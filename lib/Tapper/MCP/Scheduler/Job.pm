@@ -71,8 +71,8 @@ sub match_host {
         {
                 no strict 'refs'; ## no critic (ProhibitNoStrict)
         FREE_HOST:
-                foreach my $free_host( map { $_->{host} || undef } @$free_hosts) {
-                        if (defined $free_host and @{$free_host->queues} and $free_host->name eq $req_host->name){
+                foreach my $free_host( map {$_->{host} } @$free_hosts) {
+                        if (@{$free_host->queues}){
                                 QUEUE_CHECK:
                                 {
                                         foreach my $queue(@{$free_host->queues}) {
@@ -197,7 +197,7 @@ sub fits {
         {
                 foreach my $host (map {$_->{host} } @$free_hosts) {
                         if (@{$host->queues}){
-                                foreach my $queue(@{$host->queues || []}) {
+                                foreach my $queue(@{$host->queues}) {
                                         return $host if $queue->id == $self->queue_id;
                                 }
                         } else {

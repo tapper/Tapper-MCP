@@ -90,11 +90,9 @@ Initialize the state or read it back from database.
 
 sub state_init
 {
-    my ($self, $data, $revive) = @_;
-
-    if (!$self->state_details) {
+        my ($self, $data) = @_;
         $self->state_details($data);
-        $self->state_details->{current_state} = $revive ? 'invalid' : 'started';
+        $self->state_details->{current_state} = 'started';
         $self->state_details->{results} = [];
         $self->state_details->{prcs} ||= [];
         $self->state_details->{keep_alive}{timeout_date} = $self->state_details->{keep_alive}{timeout_span} + time if defined $self->state_details->{keep_alive}{timeout_span};
@@ -102,8 +100,7 @@ sub state_init
                 $this_prc->{results} ||= [];
         }
         $self->db_update();
-    }
-    return 0;
+        return 0;
 }
 
 
