@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - intermediate release with misc experimental fixes
 
 5.0.1     2016-02-16
         - better version dependent experimental warnings
