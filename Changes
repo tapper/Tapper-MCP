@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.2     2016-03-03
         - intermediate release with misc experimental fixes
 
 5.0.1     2016-02-16
