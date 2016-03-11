@@ -123,7 +123,7 @@ information when the test run is finished and the child process ends.
         {
                 my ($self) = @_;
         CHILD: while ($self->dead_child) {
-                        $self->log->debug("Number of dead children is ".$self->dead_child);
+                        $self->log->debug("Number of dead testrun processes is ".$self->dead_child);
                         my $dead_pid = waitpid(-1, WNOHANG);  # don't use wait(); qx() sends a SIGCHLD and increases $self->deadchild, but wait() for the return value and thus our wait would block
 
                         $self->dead_child($self->dead_child - 1);
@@ -229,6 +229,7 @@ Run the tests that are due.
                         } else {
                                 $self->log->info("Testrun $id ($system) finished successfully");
                         }
+                        $self->scheduler->mark_job_as_finished($job);
                         exit 0;
                 } else {
 

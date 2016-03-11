@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - logfile wording and job finishing
 
 5.0.2     2016-03-03
         - intermediate release with misc experimental fixes
