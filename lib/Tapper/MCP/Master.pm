@@ -91,6 +91,7 @@ Set interrupt handlers for important signals. No parameters, no return values.
                 my ($self) = @_;
                 $SIG{CHLD} = sub {
                         $self->dead_child($self->dead_child + 1);
+                        $self->log->debug("SIGCHLD - counter: ".$self->dead_child);
                 };
 
                 # give me a stack trace when ^C
@@ -129,11 +130,14 @@ information when the test run is finished and the child process ends.
                         $self->dead_child($self->dead_child - 1);
                         next if not $self->child->{$dead_pid}; # sig raised by qx()
 
-                        my $host = $self->child->{$dead_pid}->{job}->host->name;
-                        $self->log->debug("test on $host finished");
-                        $self->scheduler->mark_job_as_finished( $self->child->{$dead_pid}->{job} );
+                        my $job = $self->child->{$dead_pid}->{job};
+                        my $host = $job->host->name;
+                        my $testrun = $job->testrun->id;
+                        $self->log->debug("Testrun $testrun (pid $dead_pid) on host '$host' finished as dead process");
+                        $self->scheduler->mark_job_as_finished( $job );
                         delete $self->child->{$dead_pid};
                 }
+                $self->log->debug("handled dead processes - SIGCHLD - counter: ".$self->dead_child);
         }
 
 
@@ -227,9 +231,8 @@ Run the tests that are due.
                         if ($retval) {
                                 $self->log->error("Testrun $id ($system) error occurred: $retval");
                         } else {
-                                $self->log->info("Testrun $id ($system) finished successfully");
+                                $self->log->debug("Testrun $id (pid $$) on host '$system' finished successfully");
                         }
-                        $self->scheduler->mark_job_as_finished($job);
                         exit 0;
                 } else {
 
