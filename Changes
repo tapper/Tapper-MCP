@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - scheduler fixes
 
 5.0.3     2016-03-11
         - logfile wording and job finishing
