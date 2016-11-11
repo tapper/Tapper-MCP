@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - for 'local' replace hardcoded script with config entry
 
 5.0.4     2016-08-09
         - scheduler fixes

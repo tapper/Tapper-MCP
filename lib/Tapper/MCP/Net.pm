@@ -85,7 +85,8 @@ sub start_local
 {
         my ($self, $path_to_config) = @_;
 
-        my $error = qx(tapper-client --config $path_to_config);
+        my $tapper_script = $self->cfg->{files}{tapper_prc};
+        my $error = qx($tapper_script --config $path_to_config);
         return "Can not start PRC locally: $error" if $error;
         return 0;
 }
