@@ -275,6 +275,90 @@ sub start_testrun
         return 0;
 }
 
+=head2 kill_process($pid)
+
+Gracefully kill a single process.
+
+=cut
+
+sub kill_process
+{
+    my ($pid) = @_;
+
+    # allow testprogram to react on SIGTERM, then do SIGKILL
+    kill ('SIGTERM', $pid);
+    waitpid $pid, 0;
+    my $grace_period = $ENV{HARNESS_ACTIVE} ? 0 : 2;
+    while ( $grace_period > 0 and (kill 0, $pid) ) {
+        $grace_period--;
+        sleep 1;
+    }
+    if (kill 0, $pid) {
+        kill 'SIGKILL', $pid;
+        waitpid $pid, 0;
+    }
+}
+
+=head2 get_process_tree($pid)
+
+Get list of children for a process. The process itself is not
+contained in the list.
+
+=cut
+
+sub get_process_tree
+{
+  my ($pid) = @_;
+
+  return () unless $pid && $pid > 1;
+
+  require Proc::Killfam;
+  require Proc::ProcessTable;
+  return Proc::Killfam::get_pids(Proc::ProcessTable->new->table, $pid);
+}
+
+=head2 kill_process_tree($pid)
+
+Kill whole tree of processes, depth-first, with extreme prejudice.
+
+=cut
+
+sub kill_process_tree
+{
+    my ($pid) = @_;
+
+    return unless $pid && $pid > 1;
+
+    my @pids = get_process_tree($pid);
+    kill_process($_) foreach ($pid, @pids);
+    if (@pids) { kill_process_tree($_) foreach @pids }
+}
+
+=head2 kill_local_prc_processes
+
+Kill remaining processes from this testrun. Only done wfor testruns
+that run 'local'.
+
+@param Tapper::MC::Net object
+
+=cut
+
+sub kill_local_prc_processes
+{
+        my ($self) = @_;
+
+        if (lc($self->mcp_info->test_type) eq 'local')
+        {
+            my $testrun_id = $self->testrun->id;
+            my $cmd = qq(ps auxwww | grep ' \\b[t]apper-prc-testcontrol-$testrun_id\\b' | awk '{print \$2}');
+            my $pid = qx($cmd); chomp $pid;
+            if ($pid) {
+                $self->log->debug("Killing pid $pid of testrun $testrun_id");
+                kill_process_tree($pid);
+            }
+        }
+}
+
 =head2 runtest_handling
 
 Start testrun and wait for completion.
@@ -339,6 +423,7 @@ sub runtest_handling
         $self->log->debug('waiting for test to finish');
         $self->wait_for_testrun();
         $self->report_mcp_results();
+        $self->kill_local_prc_processes();
         return 0;
 
 }

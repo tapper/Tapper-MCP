@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - Cancel 'local' testruns kills the whole process tree behind it
 
 5.0.5     2016-11-11
         - for 'local' replace hardcoded script with config entry
