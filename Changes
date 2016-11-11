@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.5     2016-11-11
         - for 'local' replace hardcoded script with config entry
 
 5.0.4     2016-08-09
