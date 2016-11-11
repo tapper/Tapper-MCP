@@ -247,8 +247,8 @@ sub start_testrun
                             $config->{paths}{localdata_path}."/$hostname-install-$tr_id";
                         $local_retval = $net->start_local($path_to_config);
                         if ($local_retval) {
-                                $self->handle_error("Starting Tapper on testmachine with SSH", $local_retval);
-                                return ("Starting Tapper on testmachine with SSH failed: $local_retval");
+                                $self->handle_error("Starting Tapper locally", $local_retval);
+                                return ("Starting Tapper locally failed: $local_retval");
                         }
                 }
                 default {
