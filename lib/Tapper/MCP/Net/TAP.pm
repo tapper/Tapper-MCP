@@ -206,8 +206,8 @@ sub upload_files
                 chomp $file;
                 my $reportfile=$file;
                 $reportfile =~ s|^$path||;
-                $reportfile =~ s|^./||;
-                $reportfile =~ s|[^A-Za-z0-9_-]|_|g;
+                #$reportfile =~ s|^./||;
+                #$reportfile =~ s|[^A-Za-z0-9_-]|_|g;
                 my $cmdline =  "#! upload $reportid ";
                 $cmdline   .=  $reportfile;
                 $cmdline   .=  " plain\n";
