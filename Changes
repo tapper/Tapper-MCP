@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - less aggressive name simplification of uploaded files
 
 5.0.6     2016-11-11
         - Cancel 'local' testruns kills the whole process tree behind it
