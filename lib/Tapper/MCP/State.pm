@@ -708,7 +708,7 @@ sub msg_error_testprogram
         if ($msg->{testprogram} != $current_test_number) {
                 my $result = {error => 1,
                               msg => "Invalid order of testprograms in PRC $nr. ".
-                              "Expected $current_test_number, got $msg->{testprograms}"
+                              "Expected $current_test_number, got $msg->{testprogram}"
                              };
                 $self->state_details->prc_results($nr, $result);
                 $self->state_details->results($result);
