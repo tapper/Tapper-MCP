@@ -203,6 +203,7 @@ sub handle_error
 Start Installer on testmachine based on the type of testrun.
 
 @param hash ref - config
+@param bool     - revive mode
 
 @return success - 0
 @return error   - error string
@@ -212,7 +213,7 @@ Start Installer on testmachine based on the type of testrun.
 sub start_testrun
 {
         no if $] >= 5.017011, warnings => 'experimental::smartmatch';
-        my ($self, $config) = @_;
+        my ($self, $config, $revive) = @_;
 
         my $net    = Tapper::MCP::Net->new();
         $net->cfg->{testrun_id} = $self->testrun->id;
@@ -406,7 +407,7 @@ sub runtest_handling
         $self->state->state_init($self->mcp_info->get_state_config, $revive );
 
         if ($self->state->compare_given_state('reboot_install') == 1) { # before reboot_install?
-                my $error = $self->start_testrun($config);
+                my $error = $self->start_testrun($config, $revive);
                 return $error if $error;
 
                 my $message = model('TestrunDB')->resultset('Message')->new
