@@ -254,6 +254,20 @@ sub start_testrun
                                 return ("Starting Tapper locally failed: $local_retval");
                         }
                 }
+                when('minion') {
+                        $self->log->debug("Starting MINION testrun on $hostname");
+                        my $local_retval;
+                        my $tr_id = $self->testrun->id;
+                        my $path_to_config = $self->mcp_info->skip_install ?
+                          $config->{paths}{localdata_path}."/$hostname-test-prc0-$tr_id" :
+                            $config->{paths}{localdata_path}."/$hostname-install-$tr_id";
+                        $local_retval = $net->start_minion($path_to_config, $revive);
+                        if ($local_retval) {
+                                $self->handle_error("Starting Tapper via Minion", $local_retval);
+                                return ("Starting Tapper via Minion failed: $local_retval");
+                        }
+                        $self->log->debug("Returned from start_minion.");
+                }
                 default {
                         $self->log->debug("Write grub file for $hostname");
                         my $grub_retval = $net->write_grub_file($hostname, $config->{installer_grub});
@@ -362,6 +376,51 @@ sub kill_local_prc_processes
         }
 }
 
+=head2 cancel_minion_prc_processes
+
+Kill remaining processes from this testrun. Only done wfor testruns
+that run 'minion'
+
+@param Tapper::MCP::Net object
+
+=cut
+
+sub cancel_minion_prc_processes
+{
+    my ($self, $net) = @_;
+
+    if (lc($self->mcp_info->test_type) eq 'minion')
+    {
+
+        my $hostname = $self->testrun->testrun_scheduling->host->name;
+        my $testrun_id = $self->testrun->id;
+        my $local_retval = $net->stop_minion($testrun_id, $hostname);
+    }
+}
+
+
+=head2 cancel_minion_prc_processes
+
+Kill remaining processes from this testrun. Only done for testruns
+that run 'minion'.
+
+@param Tapper::MCP::Net object
+
+=cut
+
+sub wait_for_minion_testrun
+{
+    my ($self, $net) = @_;
+
+    if (lc($self->mcp_info->test_type) eq 'minion')
+    {
+        my $hostname = $self->testrun->testrun_scheduling->host->name;
+        my $testrun_id = $self->testrun->id;
+        #my $local_retval = $net->wait_for_minion_job($testrun_id, $hostname);
+    }
+}
+
+
 =head2 runtest_handling
 
 Start testrun and wait for completion.
@@ -425,8 +484,10 @@ sub runtest_handling
 
         $self->log->debug('waiting for test to finish');
         $self->wait_for_testrun();
-        $self->report_mcp_results();
+        $self->cancel_minion_prc_processes($net);
+        $self->wait_for_minion_testrun($net);
         $self->kill_local_prc_processes();
+        $self->report_mcp_results();
         return 0;
 
 }

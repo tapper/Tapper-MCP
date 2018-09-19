@@ -97,6 +97,10 @@ sub parse_hint_preconditions
                 $self->mcp_info->test_type('local');
                 $config->{prcs}->[0]->{skip_startscript} = 1;
                 $self->mcp_info->skip_install(1) if $precondition->{skip_install};
+        } elsif ($precondition->{minion}) {
+                $self->mcp_info->test_type('minion');
+                $config->{prcs}->[0]->{skip_startscript} = 1;
+                $self->mcp_info->skip_install(1);
         }
         return $config;
 }
