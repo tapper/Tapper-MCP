@@ -2,6 +2,10 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
         - less aggressive name simplification of uploaded files
+        - support for test type 'minion' which enqueues the testrun
+          into a Mojo Minion job queue. From there the corresponding
+          PRC minion worker can dequeue it. Requires new configuration
+          for the Minion database.
 
 5.0.6     2016-11-11
         - Cancel 'local' testruns kills the whole process tree behind it
