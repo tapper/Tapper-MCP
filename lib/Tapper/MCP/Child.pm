@@ -85,6 +85,7 @@ sub wait_for_testrun
  MESSAGE:
         while (1) {
                 my $msg = $self->get_messages($timeout_span);
+                $self->log->debug('wait_for_testrun loop');
                 ($error, $timeout_span) = $self->state->update_state($msg);
                 if ($error) {
                         last MESSAGE if $self->state->testrun_finished;
@@ -130,6 +131,7 @@ sub generate_configs
                 for (my $i=0; $i<= $#{$testconfigs}; $i++ ) {
                         my $prc_config = merge($common_config, $testconfigs->[$i]);
                         $prc_config->{guest_number} = $i;
+                        $prc_config->{test_type} = $mcpconfig->mcp_info->test_type;
                         my $suffix = "test-prc$i";
                         $suffix   .= "-".$self->testrun->id;
 
