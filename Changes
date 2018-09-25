@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - adapt to reworked Minion signal handling
 
 5.0.7     2018-09-19
         - less aggressive name simplification of uploaded files
