@@ -221,7 +221,7 @@ sub stop_minion
   if ($job_testrun == $testrun_id) {
     $self->log->debug(
       "minion: CANCEL/STOP job:$job_id testrun:$job_testrun");
-    $minion->broadcast('stop', [$job_id]);
+    $minion->broadcast('kill', ['INT', $job_id]);
   } else {
     $self->log->debug(
       "minion: NO CANCEL/STOP of job:$job_id testrun:$job_testrun != stopped testrun:$testrun_id");

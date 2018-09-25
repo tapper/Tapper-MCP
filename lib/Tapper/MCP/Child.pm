@@ -378,8 +378,8 @@ sub kill_local_prc_processes
 
 =head2 cancel_minion_prc_processes
 
-Kill remaining processes from this testrun. Only done wfor testruns
-that run 'minion'
+Kill remaining processes from this testrun. Only done for testruns
+that run 'minion'.
 
 @param Tapper::MCP::Net object
 
@@ -399,10 +399,10 @@ sub cancel_minion_prc_processes
 }
 
 
-=head2 cancel_minion_prc_processes
+=head2 wait_for_minion_testrun
 
-Kill remaining processes from this testrun. Only done for testruns
-that run 'minion'.
+Wait until the corresponding Minion job reached its 'finished'
+state. Only done for testruns that run 'minion'.
 
 @param Tapper::MCP::Net object
 
