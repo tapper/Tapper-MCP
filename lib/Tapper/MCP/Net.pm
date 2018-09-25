@@ -92,6 +92,43 @@ sub start_local
 }
 
 
+=head2 wait_for_minion_job
+
+Wait until a Minion job reaches its 'finished' state.
+
+@param string - path to config
+
+@return success - 0
+@return error   - error string
+
+=cut
+
+sub wait_for_minion_job {
+  my ($self, $testrun_id, $hostname) = @_;
+
+  my $state = '';
+  do {
+    my $minion_cfg = $self->cfg->{minion}{frontend}{Minion};
+    my $minion     = Minion->new(%$minion_cfg);
+    my $backend    = $minion->backend;
+    my $job        = $backend->list_jobs
+      (0, 1,
+       {
+         tasks => ['tapper_testrun'],
+         queues => [$hostname],
+       })->{jobs}[0];
+
+    # don't wait if already running different testrun?
+    return if $job->{notes}{testrun_id} != $testrun_id;
+
+    my $job_id = $job->{id};
+    $state     = $job->{state};
+    $self->log->debug("minion: wait for 'finished' ".
+                      "job:$job_id testrun:$testrun_id host:$hostname state:$state");
+    sleep 5;
+  } while ($state ne 'finished');
+}
+
 
 =head2 start_minion
 
@@ -114,18 +151,6 @@ client side.
 @return error   - error string
 
 =cut
-
-sub _wait_for_minion_job {
-  my ($self, $backend, $job_id, $testrun_id, $hostname) = @_;
-
-  my $state = '';
-  do {
-    my $jobs  = $backend->list_jobs(0, 1, {ids => [$job_id]});
-    $state = $jobs->{jobs}[0]{state};
-    $self->log->debug("minion: wait for job:$job_id testrun:$testrun_id host:$hostname state:$state");
-    sleep 10;
-  } while ($state ne 'finished');
-}
 
 sub start_minion
 {
