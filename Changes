@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.8     2019-11-04
         - adapt to reworked Minion signal handling
 
 5.0.7     2018-09-19
