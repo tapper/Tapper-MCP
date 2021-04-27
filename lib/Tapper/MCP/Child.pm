@@ -118,12 +118,17 @@ sub generate_configs
         my $hostname = $self->testrun->testrun_scheduling->host->name;
         my $config_file_name = "$hostname-install-".$self->testrun->id;
 
+        my @res_reqs = $self->testrun->testrun_requested_resource;
+        my @resources = map { defined $_->selected_resource ? $_->selected_resource->name : 'unknown' } @res_reqs;
+
         $retval = $mcpconfig->write_config($config, $config_file_name);
         return $retval if $retval;
 
         if ($config->{autoinstall} or $mcpconfig->mcp_info->skip_install) {
                 my $common_config = $mcpconfig->get_common_config();
                 $common_config->{hostname} = $hostname; # allows guest systems to know their host system name
+                # allows guest system to know the resources that have been selected
+                $common_config->{resources} = \@resources;
 
                 my $testconfigs = $mcpconfig->get_test_config();
                 return $testconfigs if not ref $testconfigs eq 'ARRAY';

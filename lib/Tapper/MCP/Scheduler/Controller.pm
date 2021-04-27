@@ -47,6 +47,16 @@ sub free_hosts_with_features
         return \@hosts_with_features;
 }
 
+sub available_resources
+{
+        my $resources = model('TestrunDB')->resultset("Resource")->search(
+                {active => 1, used_by_scheduling_id => undef});
+        my @_available_resources;
+        while (my $resource = $resources->next) {
+                push @_available_resources, $resource;
+        }
+        return \@_available_resources;
+}
 
 =head2 official_queuelist
 
@@ -128,6 +138,7 @@ sub get_next_job {
                 my $free_hosts = $self->free_hosts_with_features();
                 return if not ($free_hosts and @$free_hosts);
 
+                my $available_resources = $self->available_resources();
 
                 my $queues = $self->official_queuelist();
 
@@ -135,7 +146,7 @@ sub get_next_job {
 
                 # reset the list of associated jobs with this queue on every get_next_job
                 my $prioqueue = PrioQueue->new();
-                $job = $prioqueue->get_first_fitting($free_hosts);
+                $job = $prioqueue->get_first_fitting($free_hosts, $available_resources);
 
 
         QUEUE:
@@ -143,7 +154,7 @@ sub get_next_job {
 
                         my $queue = $self->algorithm->lookup_next_queue($queues);
                         return () unless $queue;
-                        if ($job = $queue->get_first_fitting($free_hosts)) {
+                        if ($job = $queue->get_first_fitting($free_hosts, $available_resources)) {
                                 if ($job->auto_rerun) {
                                         $job->testrun->rerun;
                                 }

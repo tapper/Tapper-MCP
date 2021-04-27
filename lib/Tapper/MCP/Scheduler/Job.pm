@@ -51,6 +51,20 @@ has requested_hosts => (is => "ro",
                                 }
                                 return \@return_hosts;
                         });
+has requested_resources => (is => "ro",
+                            lazy => 1,
+                            default => sub {
+                                my ($self) = shift;
+                                my $resource_reqs = Tapper::Model::model('TestrunDB')->resultset('TestrunRequestedResource')->search(
+                                        {testrun_id => $self->testrun_id},{ prefetch => 'alternatives' });
+
+                                my @requested_resources;
+                                while (my $resource_req = $resource_reqs->next) {
+                                        push @requested_resources, $resource_req;
+                                }
+
+                                return \@requested_resources;
+                        });
 has queue         => (is => 'ro',
                       lazy => 1,
                       default => sub {
@@ -163,8 +177,53 @@ sub match_feature {
         return;
 }
 
+# Tries to acquire resources for job
+# Returns 2 values
+# - If all requested resources are available
+# - Which resources were acquired (array ref) or undef if not possible
+sub claim_resources {
+        my ($self, $free_resources) = @_;
 
+        my %res_lookup;
+        $res_lookup{$_->id} = $_ foreach (@$free_resources);
 
+        my @acquire_resources;
+
+        # Transaction, rollback unless commit is called on this
+        my $guard = Tapper::Model->model('TestrunDB')->txn_scope_guard;
+
+        foreach my $res_request (@{$self->requested_resources})
+        {
+                my $best_alternative;
+                foreach my $res_alternative ($res_request->alternatives)
+                {
+                        if (my $resource = $res_lookup{$res_alternative->resource_id})
+                        {
+                                $best_alternative = $resource;
+                                last;
+                        }
+                }
+
+                return (0,undef) unless defined $best_alternative;
+
+                # Remove from lookup so it won't be chose twice.
+                delete $res_lookup{$best_alternative->id};
+
+                # Remember choice for frontends
+                $res_request->selected_resource($best_alternative);
+                $res_request->update;
+
+                # Mark as in use
+                $best_alternative->used_by_scheduling_id($self->{id});
+                $best_alternative->update;
+
+                push @acquire_resources, $best_alternative;
+        }
+
+        $guard->commit;
+
+        return (1, \@acquire_resources);
+}
 
 # Checks a TestrunScheduling against a list of available hosts
 # returns the matching host

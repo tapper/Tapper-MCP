@@ -80,7 +80,8 @@ sub jobs
 
 sub get_first_fitting
 {
-        my ($self, $free_hosts) = @_;
+        my ($self, $free_hosts, $available_resources) = @_;
+        $available_resources = [] unless defined $available_resources;
 
         my @forbidden_host_names;
         @forbidden_host_names = map {$_->name} @{$self->deniedhosts};
@@ -92,17 +93,24 @@ sub get_first_fitting
 
         foreach my $job (@{$self->testrunschedulings}) {
                 my $host = $job->fits($free_hosts);
-                if ($host) {
-                        my $db_job = model('TestrunDB')->resultset('TestrunScheduling')->find($job->{id});
-                        $db_job->host_id ($host->id);
+                next unless $host;
 
-                        if ($db_job->testrun->scenario_element) {
-                                $db_job->testrun->scenario_element->is_fitted(1);
-                                $db_job->testrun->scenario_element->update();
-                        }
-                        $db_job->update;
-                        return $db_job;
+                # Reserves resources, must run if $resources_available is 1
+                my ($resources_available,$acquireable_resources) =
+                  $job->claim_resources($available_resources);
+                next unless $resources_available;
+
+                my $db_job = model('TestrunDB')->resultset('TestrunScheduling')->find($job->{id});
+                $db_job->host_id ($host->id);
+
+                if ($db_job->testrun->scenario_element) {
+                        $db_job->testrun->scenario_element->is_fitted(1);
+                        $db_job->testrun->scenario_element->update();
                 }
+
+                $db_job->update;
+
+                return $db_job;
         }
         return;
 }
