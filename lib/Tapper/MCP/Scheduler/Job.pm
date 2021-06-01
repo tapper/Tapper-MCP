@@ -225,6 +225,19 @@ sub claim_resources {
         return (1, \@acquire_resources);
 }
 
+# Checks whether all testruns that our job depends on have finished.
+sub dependencies_finished {
+        my ($self) = @_;
+        my $unfinished_dependency = Tapper::Model::model('TestrunDB')->resultset('TestrunDependency')->search({
+                'depender_testrun_id' => $self->testrun_id,
+                'testrun_scheduling.status' => { '!=', 'finished' },
+        },{
+                'join' => { dependee => 'testrun_scheduling' },
+        })->first;
+
+        return !defined($unfinished_dependency);
+}
+
 # Checks a TestrunScheduling against a list of available hosts
 # returns the matching host
 sub fits {

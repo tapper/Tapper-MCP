@@ -61,6 +61,9 @@ sub get_first_fitting {
                 my $host = $job->fits($free_hosts);
                 next unless $host;
 
+                # Check for unfinished dependencies
+                next unless $job->dependencies_finished;
+
                 # Reserves resources, must run if $resources_available is 1
                 my ($resources_available,$acquireable_resources) =
                   $job->claim_resources($available_resources);
