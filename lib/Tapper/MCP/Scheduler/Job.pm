@@ -104,7 +104,6 @@ sub match_host {
 
 our @functions;
 BEGIN {
-        no if $] >= 5.017011, warnings => 'experimental::smartmatch';
         my $features = Tapper::Model::model->resultset('HostFeature')->search(
                                                                               {
                                                                               },
@@ -122,13 +121,13 @@ BEGIN {
 
                             if (\$given) {
                                     # available
-                                    return \$given ~~ \$_->{features}->{$entry};
+                                    return \$given eq \$_->{features}->{$entry};
                             } else {
                                     return \$_->{features}->{$entry} };
                     }";
                 eval $eval_string; ## no critic
         }
-        if ( not grep {$_ ~~ /hostname/} @functions ) {
+        if ( not grep {$_ =~ /hostname/} @functions ) {
                 eval '
                 sub hostname (;$) ## no critic (ProhibitSubroutinePrototypes)
                               {
@@ -136,7 +135,7 @@ BEGIN {
 
                                       if ($given) {
                                               # available
-                                              return $given ~~ $_->{features}->{hostname};
+                                              return $given eq $_->{features}->{hostname};
                                       } else {
                                               return $_->{features}->{hostname};
                                       }
